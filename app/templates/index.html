@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shot Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="setup-panel">
+            <input
+                id="manual-path-input"
+                class="path-input"
+                type="text"
+                placeholder="Enter full path to project folder"
+            />
+            <button class="dark-button" onclick="loadProjectFromManualPath()">
+                Load Project from Path
+            </button>
+            <button class="dark-button" onclick="openCreateProjectModal()">
+                Create New Project at Path
+            </button>
+            <button class="dark-button" onclick="openShotsFolder()" style="margin-left: auto;">
+                Open Project Shots Folder
+            </button>
+        </div>
+    </div>
+
+    <!-- Setup Screen -->
+    <div id="setup-screen" class="setup-screen">
+        <div class="setup-card">
+            <h2 style="margin-bottom: 20px;">Shot Manager</h2>
+            <p style="margin-bottom: 30px; color: #b5b5b5;">No project is currently open.</p>
+            <p style="margin-bottom: 20px; color: #808080; font-size: 14px;">Use the menu above to create a new project or open an existing one.</p>
+        </div>
+    </div>
+
+    <!-- Main Interface (hidden initially) -->
+    <div id="main-interface" style="display: none;">
+        <div class="header">
+            <h1 class="project-title" id="project-title">Loading...</h1>
+            <button class="new-shot-btn" onclick="addNewShot()">New Shot +</button>
+        </div>
+
+        <div class="container">
+            <div class="loading" id="loading">Loading shots...</div>
+            <div class="shot-grid" id="shot-grid" style="display: none;">
+                <div class="grid-header">
+                    <div class="grid-header-cell">Shot Name</div>
+                    <div class="grid-header-cell">Image</div>
+                    <div class="grid-header-cell">Video</div>
+                    <!-- <div class="grid-header-cell">Lipsync</div> -->
+                    <div class="grid-header-cell">Notes</div>
+                </div>
+                <div id="shot-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Create Project Modal -->
+    <div id="create-project-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px;">Create New Project</h3>
+            <input id="new-project-name" type="text" placeholder="Project Name" />
+            <div class="modal-buttons">
+                <button class="dark-button" onclick="confirmCreateProject()">Create</button>
+                <button class="dark-button" onclick="closeCreateProjectModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class='app-footer'>
+        Created by <a href="https://albertbozesan.com/">Albert Bozesan</a> with ChatGPT Codex
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+    

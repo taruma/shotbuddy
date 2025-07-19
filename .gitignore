@@ -1,0 +1,8 @@
+projects.json
+uploads/
+app/static/thumbnails/
+__pycache__/
+*.py[cod]
+venv/
+Tests/
+.DS_Store
