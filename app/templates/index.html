@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shotbuddy</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <div class="menu-bar">
@@ -39,6 +40,7 @@
         <div class="header">
             <h1 class="project-title" id="project-title">Loading...</h1>
             <div class="header-controls">
+                <button id="theme-toggle" class="dark-button icon-button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">🌙</button>
                 <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder">
                     <img src="{{ url_for('static', filename='/icons/folder_24.png') }}" alt="Open Project Shots Folder" />
                 </button>

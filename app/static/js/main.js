@@ -5,6 +5,16 @@
         const NEW_SHOT_DROP_TEXT = 'Drop an asset here to create a new shot.';
         document.documentElement.style.setProperty('--new-shot-drop-text', `'${NEW_SHOT_DROP_TEXT}'`);
 
+        // Theme functions
+        function applyTheme(theme) {
+            document.body.classList.toggle('light', theme === 'light');
+            localStorage.setItem('theme', theme);
+            const btn = document.getElementById('theme-toggle');
+            if (btn) {
+                btn.textContent = theme === 'light' ? '☀️' : '🌙';
+            }
+        }
+
         // Menu functions
 
         async function loadProjectFromManualPath() {
@@ -95,6 +105,12 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             document.addEventListener('click', handlePromptButtonClick);
+            const saved = localStorage.getItem('theme') || 'dark';
+            applyTheme(saved);
+            document.getElementById('theme-toggle')?.addEventListener('click', () => {
+                const next = document.body.classList.contains('light') ? 'dark' : 'light';
+                applyTheme(next);
+            });
             checkForProject();
         });
 
