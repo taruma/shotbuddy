@@ -46,10 +46,49 @@ class ShotManager:
         self.latest_videos_dir = self.shots_dir / 'latest_videos'
         self.legacy_dir = self.project_path / '_legacy'
         self.order_file = self.shots_dir / '.shot_order.json'
+        self.archive_file = self.shots_dir / '.archived_shots.json'
 
         self.wip_dir.mkdir(parents=True, exist_ok=True)
         self.latest_images_dir.mkdir(parents=True, exist_ok=True)
         self.latest_videos_dir.mkdir(parents=True, exist_ok=True)
+
+    def _load_archived(self):
+        """Load archived shot names from JSON file."""
+        import json
+        try:
+            if self.archive_file.exists():
+                with self.archive_file.open('r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        return set(data)
+        except Exception:
+            pass
+        return set()
+
+    def _save_archived(self, names: set):
+        """Persist archived shot names to JSON file."""
+        import json
+        try:
+            self.shots_dir.mkdir(parents=True, exist_ok=True)
+            with self.archive_file.open('w', encoding='utf-8') as f:
+                json.dump(sorted(list(names)), f)
+        except Exception:
+            logger.warning("Failed to save archived shots file")
+
+    def archive_shot(self, shot_name, archived: bool):
+        """Toggle archived state for a shot and return updated shot info."""
+        validate_shot_name(shot_name)
+        shot_dir = self.wip_dir / shot_name
+        if not shot_dir.exists():
+            raise ValueError(f"Shot {shot_name} does not exist")
+
+        names = self._load_archived()
+        if archived:
+            names.add(shot_name)
+        else:
+            names.discard(shot_name)
+        self._save_archived(names)
+        return self.get_shot_info(shot_name)
 
     @staticmethod
     def _normalize_path(path):
@@ -128,6 +167,16 @@ class ShotManager:
                 thumb.rename(THUMBNAIL_CACHE_DIR / thumb.name.replace(old_name, new_name, 1))
             for vthumb in THUMBNAIL_CACHE_DIR.glob(f"{old_name}_*_vthumb.jpg"):
                 vthumb.rename(THUMBNAIL_CACHE_DIR / vthumb.name.replace(old_name, new_name, 1))
+
+        # Preserve archived state across rename
+        try:
+            names = self._load_archived()
+            if old_name in names:
+                names.discard(old_name)
+                names.add(new_name)
+                self._save_archived(names)
+        except Exception:
+            pass
 
         return self.get_shot_info(new_name)
 
@@ -404,7 +453,7 @@ class ShotManager:
                 'prompt': video_prompt,
             },
             'lipsync': lipsync,
-            'archived': False  # TODO: Implement archiving
+            'archived': (shot_name in self._load_archived())
         }
 
 

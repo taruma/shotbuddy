@@ -320,3 +320,27 @@ def promote_asset():
         return jsonify({"success": False, "error": str(e)}), 400
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@shot_bp.route("/archive", methods=["POST"])
+def archive_shot():
+    try:
+        data = request.get_json()
+        shot_name = data.get("shot_name")
+        archived = data.get("archived")
+
+        if not shot_name or archived is None:
+            return jsonify({"success": False, "error": "Missing parameters"}), 400
+
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+
+        shot_manager = get_shot_manager(project["path"])
+        shot_info = shot_manager.archive_shot(shot_name, bool(archived))
+
+        return jsonify({"success": True, "data": shot_info})
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500

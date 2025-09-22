@@ -186,6 +186,14 @@
             const shotList = document.getElementById("shot-list");
             shotList.innerHTML = "";
 
+            const activeShots = shots.filter(s => !s.archived);
+            const archivedShots = shots.filter(s => s.archived);
+
+            // Active section container
+            const activeContainer = document.createElement("div");
+            activeContainer.id = "active-shot-list";
+
+            // Create drop zones for active section
             const finalDropZone = document.createElement("div");
             finalDropZone.className = "drop-between-rows final-drop new-shot-drop-zone";
             finalDropZone.addEventListener("dragover", handleRowDragOver);
@@ -213,51 +221,72 @@
             });
             firstDropZone.appendChild(firstBtn);
 
-            if (shots.length === 0) {
+            if (activeShots.length === 0) {
                 finalDropZone.classList.add("empty-state");
                 finalDropZone.setAttribute("data-after-shot", "");
-                shotList.appendChild(finalDropZone);
-                return;
+                activeContainer.appendChild(finalDropZone);
+            } else {
+                activeContainer.appendChild(firstDropZone);
+
+                activeShots.forEach((shot, index) => {
+                    const shotRow = createShotRow(shot);
+                    activeContainer.appendChild(shotRow);
+
+                    if (index < activeShots.length - 1) {
+                        const dropBetween = document.createElement("div");
+                        dropBetween.className = "drop-between-rows";
+                        dropBetween.setAttribute("data-after-shot", shot.name);
+                        dropBetween.addEventListener("dragover", handleRowDragOver);
+                        dropBetween.addEventListener("drop", handleRowDrop);
+                        dropBetween.addEventListener("dragleave", handleRowDragLeave);
+                        const btn = document.createElement("button");
+                        btn.className = "green-button new-shot-btn inline-new-shot-btn";
+                        btn.textContent = "New Shot +";
+                        btn.addEventListener("click", () => {
+                            addNewShotAfter(dropBetween.getAttribute("data-after-shot"));
+                        });
+                        dropBetween.appendChild(btn);
+                        activeContainer.appendChild(dropBetween);
+                    }
+                });
+
+                finalDropZone.setAttribute("data-after-shot", activeShots[activeShots.length - 1].name);
+                activeContainer.appendChild(finalDropZone);
             }
 
-            shotList.appendChild(firstDropZone);
+            shotList.appendChild(activeContainer);
 
-            shots.forEach((shot, index) => {
-                const shotRow = createShotRow(shot);
-                shotList.appendChild(shotRow);
+            // Archived section
+            if (archivedShots.length > 0) {
+                const title = document.createElement("div");
+                title.className = "section-title";
+                title.textContent = "Archived";
+                shotList.appendChild(title);
 
-                if (index < shots.length - 1) {
-                    const dropBetween = document.createElement("div");
-                    dropBetween.className = "drop-between-rows";
-                    dropBetween.setAttribute("data-after-shot", shot.name);
-                    dropBetween.addEventListener("dragover", handleRowDragOver);
-                    dropBetween.addEventListener("drop", handleRowDrop);
-                    dropBetween.addEventListener("dragleave", handleRowDragLeave);
-                    const btn = document.createElement("button");
-                    btn.className = "green-button new-shot-btn inline-new-shot-btn";
-                    btn.textContent = "New Shot +";
-                    btn.addEventListener("click", () => {
-                        addNewShotAfter(dropBetween.getAttribute("data-after-shot"));
-                    });
-                    dropBetween.appendChild(btn);
-                    shotList.appendChild(dropBetween);
-                }
-            });
+                const archivedContainer = document.createElement("div");
+                archivedContainer.id = "archived-shot-list";
 
-            finalDropZone.setAttribute("data-after-shot", shots[shots.length - 1].name);
-            shotList.appendChild(finalDropZone);
+                archivedShots.forEach(shot => {
+                    const row = createShotRow(shot);
+                    archivedContainer.appendChild(row);
+                });
+
+                shotList.appendChild(archivedContainer);
+            }
 
             restoreScroll();
             initSortable();
         }
 
         function initSortable() {
-            const shotList = document.getElementById('shot-list');
-            new Sortable(shotList, {
+            const activeList = document.getElementById('active-shot-list');
+            if (!activeList) return;
+
+            new Sortable(activeList, {
                 animation: 150,
                 handle: '.shot-name',
                 onEnd: async function (evt) {
-                    const shotOrder = Array.from(shotList.children)
+                    const shotOrder = Array.from(activeList.children)
                         .filter(child => child.classList.contains('shot-row'))
                         .map(child => child.id.replace('shot-row-', ''));
 
@@ -285,11 +314,17 @@
 
         function createShotRow(shot) {
             const row = document.createElement('div');
-            row.className = 'shot-row';
+            row.className = 'shot-row' + (shot.archived ? ' archived' : '');
             row.id = `shot-row-${shot.name}`;
+
+            const actionLabel = shot.archived ? 'Unarchive' : 'Archive';
+            const actionNext = shot.archived ? false : true;
             
             row.innerHTML = `
-                <div class="shot-name" onclick="editShotName(this, '${shot.name}')">${shot.name}</div>
+                <div class="shot-name" onclick="editShotName(this, '${shot.name}')">
+                    ${shot.name}
+                    <button class="archive-btn gray-button" onclick="event.stopPropagation(); archiveShot('${shot.name}', ${actionNext})">${actionLabel}</button>
+                </div>
                 ${createDropZone(shot, 'first_image')}
                 ${createDropZone(shot, 'last_image')}
                 ${createDropZone(shot, 'video')}
@@ -707,6 +742,32 @@ async function renameShot(oldName, newName) {
     } catch (error) {
         console.error('Rename failed:', error);
         showNotification('Rename failed', 'error');
+    }
+}
+
+async function archiveShot(shotName, archived) {
+    try {
+        const response = await fetch('/api/shots/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ shot_name: shotName, archived })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showNotification(archived ? `Archived ${shotName}` : `Unarchived ${shotName}`);
+            const idx = shots.findIndex(s => s.name === shotName);
+            if (idx !== -1) {
+                shots[idx] = result.data;
+            }
+            captureScroll(`shot-row-${shotName}`);
+            renderShots();
+            restoreScroll();
+        } else {
+            showNotification(result.error || 'Failed to update archive state', 'error');
+        }
+    } catch (e) {
+        console.error('Archive toggle failed:', e);
+        showNotification('Failed to update archive state', 'error');
     }
 }
 

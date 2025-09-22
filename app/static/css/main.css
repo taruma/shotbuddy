@@ -684,3 +684,18 @@
             border-top: 1px solid #333;
             background: #111;
         }
+
+        /* Archived section styling */
+        .section-title {
+            margin: 16px 20px 8px;
+            color: #b5b5b5;
+            font-size: 14px;
+            border-top: 1px solid #333;
+            padding-top: 8px;
+        }
+
+        .shot-name .archive-btn {
+            margin-left: auto;
+            padding: 6px 10px;
+            font-size: 12px;
+        }
