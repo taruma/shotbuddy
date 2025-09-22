@@ -73,6 +73,12 @@ class FileHandler:
                 existing_file.unlink()
 
             shutil.copy2(str(wip_path), str(final_path))
+            # Update current version marker so UI shows the promoted version correctly
+            try:
+                manager = get_shot_manager(self.project_path)
+                manager.set_current_version(shot_name, file_type, version)
+            except Exception as e:
+                logger.warning("Failed to set current version marker: %s", e)
             thumb_key = shot_name
 
             # Attempt to extract embedded prompt metadata from PNG files

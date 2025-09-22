@@ -106,8 +106,22 @@
             event.stopPropagation();
             const shot = btn.dataset.shot;
             const type = btn.dataset.type;
-            const version = parseInt(btn.dataset.version, 10);
-            openPromptModal(shot, type, version);
+
+            // For image/video we set data-current-version and data-max-version.
+            // For lipsync we still have only data-version; treat it as both current and max.
+            let currentVersion = btn.dataset.currentVersion ? parseInt(btn.dataset.currentVersion, 10) : undefined;
+            let maxVersion = btn.dataset.maxVersion ? parseInt(btn.dataset.maxVersion, 10) : undefined;
+
+            if (currentVersion == null || Number.isNaN(currentVersion)) {
+                const v = parseInt(btn.dataset.version, 10);
+                currentVersion = Number.isNaN(v) ? 1 : v;
+            }
+            if (maxVersion == null || Number.isNaN(maxVersion)) {
+                const v = parseInt(btn.dataset.version, 10);
+                maxVersion = Number.isNaN(v) ? currentVersion : v;
+            }
+
+            openPromptModal(shot, type, currentVersion, maxVersion);
         }
 
         async function checkForProject() {
@@ -292,12 +306,14 @@
 
         function createDropZone(shot, type) {
             const file = shot[type];
-            const hasFile = file.version > 0;
+            const currentVersion = (file && (file.current_version || file.max_version)) || 0;
+            const maxVersion = (file && file.max_version) || 0;
+            const hasFile = maxVersion > 0 || currentVersion > 0;
 
             if (hasFile) {
                 const thumbnailUrl = file.thumbnail ? `${file.thumbnail}?v=${Date.now()}` : null;
-                const thumbnailStyle = thumbnailUrl ? 
-                    `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` : 
+                const thumbnailStyle = thumbnailUrl ?
+                    `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` :
                     'background: #404040;';
 
             
@@ -311,12 +327,15 @@
                                 style="${thumbnailStyle}"
                                 onclick="revealFile('${file.file}')"></div>
 
-                            <div class="version-badge">v${String(file.version).padStart(3, '0')}</div>
+                            <div class="version-badge"
+                                 title="Click to cycle version"
+                                 onclick="cycleAssetVersion('${shot.name}', '${type}')">v${String(currentVersion).padStart(3, '0')}</div>
                             <button class="prompt-button"
                                     title="View and edit prompt"
                                     data-shot="${shot.name}"
                                     data-type="${type}"
-                                    data-version="${file.version}">P</button>
+                                    data-current-version="${currentVersion}"
+                                    data-max-version="${maxVersion}">P</button>
                         </div>
                     </div>
                 `;
@@ -470,6 +489,43 @@
             } catch (error) {
                 console.error('Upload error:', error);
                 showNotification('Upload failed', 'error');
+            }
+        }
+
+        async function cycleAssetVersion(shotName, assetType) {
+            const shot = shots.find(s => s.name === shotName);
+            if (!shot || !shot[assetType]) return;
+
+            const info = shot[assetType];
+            const maxV = info.max_version || 0;
+            if (maxV < 1) return;
+
+            const curr = info.current_version || maxV;
+            const next = (curr % maxV) + 1;
+
+            try {
+                showNotification('Switching version...');
+                const response = await fetch('/api/shots/promote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shot_name: shotName, asset_type: assetType, version: next })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    const updated = result.data;
+                    const idx = shots.findIndex(s => s.name === shotName);
+                    if (idx !== -1) {
+                        shots[idx] = updated;
+                    }
+                    captureScroll(`shot-row-${shotName}`);
+                    renderShots();
+                    restoreScroll();
+                } else {
+                    showNotification(result.error || 'Failed to switch version', 'error');
+                }
+            } catch (error) {
+                console.error('Promote failed:', error);
+                showNotification('Failed to switch version', 'error');
             }
         }
 
@@ -736,31 +792,31 @@ async function selectPromptVersion(v) {
     toggleVersionDropdown();
 }
 
-async function openPromptModal(shotName, assetType, version) {
+async function openPromptModal(shotName, assetType, currentVersion, maxVersion) {
     const modal = document.getElementById('prompt-modal');
     modal.dataset.shot = shotName;
     modal.dataset.type = assetType;
 
     const typeLabel = assetType.charAt(0).toUpperCase() + assetType.slice(1);
     document.getElementById('prompt-modal-title').textContent = `${shotName} ${typeLabel} Prompt`;
-    const versions = Array.from({ length: version }, (_, i) => i + 1);
+    const versions = Array.from({ length: maxVersion }, (_, i) => i + 1);
     modal.dataset.versions = JSON.stringify(versions);
-    modal.dataset.assetVersion = version;
-    buildVersionDropdown(versions, version);
+    modal.dataset.assetVersion = currentVersion;
+    buildVersionDropdown(versions, currentVersion);
 
-    let prompt = await fetchPrompt(shotName, assetType, version);
+    let prompt = await fetchPrompt(shotName, assetType, currentVersion);
     const copyBtn = document.getElementById('copy-prompt-btn');
     copyBtn.style.display = 'none';
     modal.dataset.prevPrompt = '';
 
-    if (!prompt && version > 1) {
-        const prevPrompt = await fetchPrompt(shotName, assetType, version - 1);
+    if (!prompt && currentVersion > 1) {
+        const prevPrompt = await fetchPrompt(shotName, assetType, currentVersion - 1);
         if (prevPrompt) {
             modal.dataset.prevPrompt = prevPrompt;
             copyBtn.style.display = 'inline-block';
         }
     }
-    modal.dataset.version = version;
+    modal.dataset.version = currentVersion;
     document.getElementById('prompt-text').value = prompt;
 
     modal.style.display = 'flex';

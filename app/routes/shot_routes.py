@@ -293,3 +293,30 @@ def open_shots_folder():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@shot_bp.route("/promote", methods=["POST"])
+def promote_asset():
+    try:
+        data = request.get_json()
+        shot_name = data.get("shot_name")
+        asset_type = data.get("asset_type")
+        version = data.get("version")
+
+        if not shot_name or not asset_type or version is None:
+            return jsonify({"success": False, "error": "Missing parameters"}), 400
+
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+
+        shot_manager = get_shot_manager(project["path"])
+        shot_manager.promote_asset(shot_name, asset_type, int(version))
+        shot_info = shot_manager.get_shot_info(shot_name)
+
+        return jsonify({"success": True, "data": shot_info})
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
