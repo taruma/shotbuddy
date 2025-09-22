@@ -7,3 +7,4 @@ venv/
 Tests/
 .DS_Store
 .env
+.venv
