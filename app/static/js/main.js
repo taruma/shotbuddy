@@ -234,6 +234,39 @@
             shotList.appendChild(finalDropZone);
 
             restoreScroll();
+            initSortable();
+        }
+
+        function initSortable() {
+            const shotList = document.getElementById('shot-list');
+            new Sortable(shotList, {
+                animation: 150,
+                handle: '.shot-name',
+                onEnd: async function (evt) {
+                    const shotOrder = Array.from(shotList.children)
+                        .filter(child => child.classList.contains('shot-row'))
+                        .map(child => child.id.replace('shot-row-', ''));
+
+                    try {
+                        const response = await fetch('/api/shots/reorder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ shot_order: shotOrder })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            showNotification('Shot order saved');
+                            // Re-sync the local shots array with the new order
+                            shots.sort((a, b) => shotOrder.indexOf(a.name) - shotOrder.indexOf(b.name));
+                        } else {
+                            showNotification(result.error || 'Failed to save order', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error saving shot order:', error);
+                        showNotification('Error saving shot order', 'error');
+                    }
+                }
+            });
         }
 
         function createShotRow(shot) {

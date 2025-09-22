@@ -180,33 +180,38 @@
             color: #b5b5b5;
         }
 
-        .shot-row {
-            display: grid;
-            grid-template-columns: 110px 160px 160px 1fr; /* Adjust widths here */
-            align-items: start; /* Align content to top/left */
-            border-bottom: 1px solid #404040;
-            transition: background 0.2s;
-            padding-bottom: 10px; /* Add space below to mirror top */
-        }
+.shot-row {
+    display: grid;
+    grid-template-columns: 110px 160px 160px 1fr;
+    border-bottom: 1px solid #404040;
+    align-items: center;
+}
 
-        .shot-row:hover {
-            background: #2a2a2a;
-        }
+.shot-row:hover {
+    background: #2a2a2a;
+}
 
-        .shot-row.archived {
-            opacity: 0.5;
-            background: #2a2a2a;
-        }
+.shot-row.archived {
+    opacity: 0.5;
+    background: #2a2a2a;
+}
 
-        .shot-name {
-            padding: 20px 16px;
-            font-weight: 500;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            color: #e5e5e5;
-        }
+.shot-name {
+    padding: 20px 16px;
+    font-weight: 500;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    color: #e5e5e5;
+}
+
+.drag-handle-info {
+    font-size: 0.8em;
+    color: #888;
+    margin-left: 5px;
+}
 
         /* Drop Zones */
         .drop-zone {

@@ -45,6 +45,7 @@ class ShotManager:
         self.latest_images_dir = self.shots_dir / 'latest_images'
         self.latest_videos_dir = self.shots_dir / 'latest_videos'
         self.legacy_dir = self.project_path / '_legacy'
+        self.order_file = self.shots_dir / '.shot_order.json'
 
         self.wip_dir.mkdir(parents=True, exist_ok=True)
         self.latest_images_dir.mkdir(parents=True, exist_ok=True)
@@ -137,11 +138,35 @@ class ShotManager:
         if not self.wip_dir.exists():
             return []
 
-        shots = []
-        for shot_dir in sorted(self.wip_dir.iterdir()):
-            if shot_dir.is_dir() and shot_dir.name.startswith('SH'):
-                shots.append(self.get_shot_info(shot_dir.name))
+        shot_dirs = [d for d in self.wip_dir.iterdir() if d.is_dir() and d.name.startswith('SH')]
+        
+        if self.order_file.exists():
+            import json
+            with self.order_file.open('r') as f:
+                ordered_names = json.load(f)
+            
+            # Create a map of name to directory for quick lookup
+            dir_map = {d.name: d for d in shot_dirs}
+            
+            # Reorder shot_dirs based on the loaded order
+            ordered_dirs = [dir_map[name] for name in ordered_names if name in dir_map]
+            
+            # Add any new shots that are not in the order file yet
+            existing_ordered_names = set(ordered_names)
+            new_dirs = [d for d in shot_dirs if d.name not in existing_ordered_names]
+            
+            shot_dirs = ordered_dirs + sorted(new_dirs) # Sort new dirs by name
+        else:
+            shot_dirs = sorted(shot_dirs)
+
+        shots = [self.get_shot_info(shot_dir.name) for shot_dir in shot_dirs]
         return shots
+
+    def save_shot_order(self, shot_order):
+        """Save the order of shots."""
+        import json
+        with self.order_file.open('w') as f:
+            json.dump(shot_order, f)
 
     def create_shot_between(self, after_shot=None):
         """Create a new shot between existing shots.

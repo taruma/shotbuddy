@@ -179,6 +179,27 @@ def rename_shot():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@shot_bp.route("/reorder", methods=["POST"])
+def reorder_shots():
+    try:
+        data = request.get_json()
+        shot_order = data.get("shot_order")
+
+        if shot_order is None:
+            return jsonify({"success": False, "error": "Shot order required"}), 400
+
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+
+        shot_manager = get_shot_manager(project["path"])
+        shot_manager.save_shot_order(shot_order)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @shot_bp.route("/create-between", methods=["POST"])
 def create_shot_between():
     try:
