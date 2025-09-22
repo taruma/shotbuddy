@@ -20,13 +20,12 @@ The application automatically manages the latest versions in `latest_images` and
 
 ## Installation
 
-Follow these steps to get the application running on any operating system. The
-only prerequisite is that `git` is already installed on your machine.
+Using uv
 
-1. **Install Python 3** – Download and install the latest version of Python 3
-   from [python.org](https://www.python.org/downloads/) or use your operating
-   system's package manager.
-2. **Clone the repository**
+1. Install uv
+   See https://docs.astral.sh/uv/
+
+2. Clone the repository
 
    ```bash
    git clone https://github.com/albozes/shotbuddy.git
@@ -34,38 +33,20 @@ only prerequisite is that `git` is already installed on your machine.
    ```bash
    cd shotbuddy
    ```
-3. **Create and activate a virtual environment**
 
-   Windows
-   ```bash
-   python -m venv venv
-   ```
-   ```bash
-   venv\Scripts\activate
-   ```
-   Linux/macOS
-   ```bash
-   python3 -m venv venv
-   ```
-   ```bash
-   source venv/bin/activate
-   ```
-
-4. **Install dependencies**
+3. Create the environment and install dependencies
 
    ```bash
-   pip install -r requirements.txt
+   uv sync
    ```
-5. **Run the development server**
-   Windows
+
+4. Run the development server
+
    ```bash
-   python run.py
+   uv run run.py
    ```
-   Linux/macOS
-   ```bash
-   python3 run.py
-   ```
-7. **Open your browser**
+
+5. Open your browser
 
    By default, Shotbuddy will be available at http://127.0.0.1:5001/
 
@@ -123,5 +104,5 @@ Notes on individual shots can be made easily.
 ![Shotbuddy_04](https://github.com/user-attachments/assets/7567416e-3f4b-42d0-888c-b8296b261616)
 
 ## License
-This project is licensed under the [MIT License](./LICENSE.md).
+This project is licensed under the [MIT License](./LICENSE.txt).
 Some third-party assets (e.g., icons) are included under their own licenses, as detailed in the [THIRD_PARTY_LICENSES](./THIRD_PARTY_LICENSES.md) file.

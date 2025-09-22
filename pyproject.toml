@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling>=1.26.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shotbuddy"
+version = "0.1.0"
+description = "AI-driven image-to-video filmmaking workflow manager"
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+authors = [{ name = "Shotbuddy Authors" }]
+requires-python = ">=3.9"
+dependencies = [
+  "flask",
+  "flask-cors",
+  "pillow",
+]
+
+[tool.uv]
+package = false
