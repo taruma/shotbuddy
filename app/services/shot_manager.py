@@ -423,6 +423,8 @@ class ShotManager:
         logger.debug("%s -> Last image thumbnail: %s", shot_name, last_thumb)
         logger.debug("%s -> Video thumbnail: %s", shot_name, video_thumb)
 
+        captions = self.load_captions(shot_name)
+
         # Compose response with backward-compatible 'image' alias pointing to first_image
         first_image_dict = {
             'file': first_image_path,
@@ -430,6 +432,7 @@ class ShotManager:
             'max_version': first_max_version,
             'thumbnail': first_thumb,
             'prompt': first_prompt,
+            'caption': captions.get('first_image', ''),
         }
         last_image_dict = {
             'file': last_image_path,
@@ -437,6 +440,7 @@ class ShotManager:
             'max_version': last_max_version,
             'thumbnail': last_thumb,
             'prompt': last_prompt,
+            'caption': captions.get('last_image', ''),
         }
 
         return {
@@ -451,6 +455,7 @@ class ShotManager:
                 'max_version': max_video_version,
                 'thumbnail': video_thumb,
                 'prompt': video_prompt,
+                'caption': captions.get('video', ''),
             },
             'lipsync': lipsync,
             'archived': (shot_name in self._load_archived())
@@ -646,6 +651,42 @@ class ShotManager:
                 f.write(notes)
         except Exception as e:
             raise ValueError(f"Failed to save notes: {str(e)}")
+
+    def _captions_file(self, shot_name):
+        """Return path to the captions JSON for a shot."""
+        return (self.wip_dir / shot_name) / 'captions.json'
+
+    def load_captions(self, shot_name):
+        """Load captions dict for a shot."""
+        validate_shot_name(shot_name)
+        path = self._captions_file(shot_name)
+        try:
+            import json
+            if path.exists():
+                with path.open('r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
+        except Exception:
+            pass
+        return {}
+
+    def save_caption(self, shot_name, asset_type, caption):
+        """Persist caption text for given asset type for a shot."""
+        validate_shot_name(shot_name)
+        if asset_type not in {'first_image', 'last_image', 'video'}:
+            raise ValueError('Invalid asset type')
+        shot_dir = self.wip_dir / shot_name
+        if not shot_dir.exists():
+            raise ValueError(f"Shot {shot_name} does not exist")
+        captions = self.load_captions(shot_name)
+        captions[asset_type] = caption or ''
+        try:
+            import json
+            with self._captions_file(shot_name).open('w', encoding='utf-8') as f:
+                json.dump(captions, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            raise ValueError(f"Failed to save caption: {str(e)}")
 
     def _prompt_file_path(self, shot_name, asset_type, version):
         """Return the path to the prompt file for a specific asset version."""

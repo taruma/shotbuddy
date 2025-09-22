@@ -368,7 +368,7 @@
 
             
                 return `
-                    <div class="drop-zone"
+                    <div class="drop-zone with-caption"
                          ondragover="handleDragOver(event, '${type}')"
                          ondrop="handleDrop(event, '${shot.name}', '${type}')"
                          ondragleave="handleDragLeave(event)">
@@ -387,6 +387,12 @@
                                     data-current-version="${currentVersion}"
                                     data-max-version="${maxVersion}">P</button>
                         </div>
+                        <input class="asset-caption-input"
+                               type="text"
+                               placeholder="Add text..."
+                               value="${file.caption ? String(file.caption).replace(/&/g,'&').replace(/"/g,'"').replace(/</g,'<').replace(/>/g,'>') : ''}"
+                               onblur="saveCaption('${shot.name}', '${type}', this.value)"
+                               onchange="saveCaption('${shot.name}', '${type}', this.value)" />
                     </div>
                 `;
             } else {
@@ -720,7 +726,28 @@
                 showNotification('Error saving notes', 'error');
             }
         }
-
+    
+async function saveCaption(shotName, assetType, caption) {
+    try {
+        const response = await fetch('/api/shots/caption', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                shot_name: shotName,
+                asset_type: assetType,
+                caption: caption
+            })
+        });
+        const result = await response.json();
+        if (!result.success) {
+            showNotification(result.error || 'Failed to save caption', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving caption:', error);
+        showNotification('Error saving caption', 'error');
+    }
+}
+    
 function editShotName(element, currentName) {
     const newName = prompt('Enter new shot name', currentName);
     if (!newName || newName === currentName) {

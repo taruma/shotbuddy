@@ -90,6 +90,31 @@ def save_shot_notes():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@shot_bp.route("/caption", methods=["POST"])
+def save_caption():
+    try:
+        data = request.get_json()
+        shot_name = data.get("shot_name")
+        asset_type = data.get("asset_type")
+        caption = data.get("caption", "")
+
+        if not shot_name or not asset_type:
+            return jsonify({"success": False, "error": "Missing parameters"}), 400
+
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+
+        shot_manager = get_shot_manager(project["path"])
+        shot_manager.save_caption(shot_name, asset_type, caption)
+
+        return jsonify({"success": True})
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @shot_bp.route("/prompt", methods=["POST"])
 def save_shot_prompt():
     try:
