@@ -96,9 +96,14 @@
 
         /* Header */
         .header {
-            background: #252525;
+            background: #202020;
+            padding: 0;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.35);
+        }
+
+        .header .container {
             padding: 20px;
-            border-bottom: 1px solid #404040;
             display: flex;
             justify-content: space-between;
             align-items: center;
