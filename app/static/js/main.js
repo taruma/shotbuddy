@@ -321,10 +321,14 @@
             const actionNext = shot.archived ? false : true;
             
             row.innerHTML = `
-                <div class="shot-name" onclick="editShotName(this, '${shot.name}')">
-                    ${shot.name}
-                    <button class="archive-btn gray-button" onclick="event.stopPropagation(); archiveShot('${shot.name}', ${actionNext})">${actionLabel}</button>
+                <div class="action-cell">
+                    <button class="icon-btn" title="${actionLabel}" aria-label="${actionLabel}" onclick="event.stopPropagation(); archiveShot('${shot.name}', ${actionNext})">
+                        ${shot.archived
+                            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="7 14 12 9 17 14"></polyline><line x1="12" y1="9" x2="12" y2="21"></line><rect x="3" y="3" width="18" height="6" rx="2"></rect></svg>'
+                            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line><rect x="3" y="15" width="18" height="6" rx="2"></rect></svg>'}
+                    </button>
                 </div>
+                <div class="shot-name" onclick="editShotName(this, '${shot.name}')">${shot.name}</div>
                 ${createDropZone(shot, 'first_image')}
                 ${createDropZone(shot, 'last_image')}
                 ${createDropZone(shot, 'video')}
