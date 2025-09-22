@@ -290,7 +290,8 @@
             
             row.innerHTML = `
                 <div class="shot-name" onclick="editShotName(this, '${shot.name}')">${shot.name}</div>
-                ${createDropZone(shot, 'image')}
+                ${createDropZone(shot, 'first_image')}
+                ${createDropZone(shot, 'last_image')}
                 ${createDropZone(shot, 'video')}
                 ${'' /* createLipsyncZone(shot) */}
                 <div class="notes-cell">
@@ -302,6 +303,16 @@
             `;
             
             return row;
+        }
+
+        function displayAssetLabel(type) {
+            switch (type) {
+                case 'first_image': return 'First Frame';
+                case 'last_image': return 'Last Frame';
+                case 'video': return 'Video';
+                default:
+                    return type.charAt(0).toUpperCase() + type.slice(1);
+            }
         }
 
         function createDropZone(shot, type) {
@@ -347,7 +358,7 @@
                          ondrop="handleDrop(event, '${shot.name}', '${type}')"
                          ondragleave="handleDragLeave(event)">
                         <div class="drop-placeholder">
-                            <div class="text">Add ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                            <div class="text">Add ${displayAssetLabel(type)}</div>
                         </div>
                     </div>
                 `;
@@ -624,7 +635,7 @@
             const imageExts = ['jpg', 'jpeg', 'png', 'webp'];
             const videoExts = ['mp4', 'mov'];
 
-            if (imageExts.includes(ext)) return 'image';
+            if (imageExts.includes(ext)) return 'first_image'; // default image target
             if (videoExts.includes(ext)) return 'video';
             return null;
         }
@@ -632,7 +643,7 @@
         function openFileDialog(shotName, fileType) {
             const input = document.createElement('input');
             input.type = 'file';
-            if (fileType === 'image') {
+            if (fileType === 'first_image' || fileType === 'last_image' || fileType === 'image') {
                 input.accept = 'image/*';
             } else if (fileType === 'video') {
                 input.accept = 'video/*';
@@ -797,7 +808,7 @@ async function openPromptModal(shotName, assetType, currentVersion, maxVersion) 
     modal.dataset.shot = shotName;
     modal.dataset.type = assetType;
 
-    const typeLabel = assetType.charAt(0).toUpperCase() + assetType.slice(1);
+    const typeLabel = displayAssetLabel(assetType);
     document.getElementById('prompt-modal-title').textContent = `${shotName} ${typeLabel} Prompt`;
     const versions = Array.from({ length: maxVersion }, (_, i) => i + 1);
     modal.dataset.versions = JSON.stringify(versions);
@@ -853,8 +864,11 @@ async function savePrompt() {
         } else {
             const shot = shots.find(s => s.name === shotName);
             if (shot) {
-                if (assetType === 'image' || assetType === 'video') {
-                    shot[assetType].prompt = promptText;
+                if (assetType === 'first_image' || assetType === 'last_image' || assetType === 'image' || assetType === 'video') {
+                    const key = assetType === 'image' ? 'first_image' : assetType; // legacy map
+                    if (shot[key]) {
+                        shot[key].prompt = promptText;
+                    }
                 } else if (shot.lipsync && shot.lipsync[assetType]) {
                     shot.lipsync[assetType].prompt = promptText;
                 }

@@ -47,39 +47,51 @@ class FileHandler:
         shot_dir = self.wip_dir / shot_name
         file_ext = Path(file.filename).suffix.lower()
 
-        if file_type == 'image' and file_ext not in ALLOWED_IMAGE_EXTENSIONS:
+        # Normalize/validate file type and extension
+        is_image_type = file_type in {'image', 'first_image', 'last_image'}
+        is_video_type = file_type == 'video'
+        is_lipsync_type = file_type in {'driver', 'target', 'result'}
+
+        if is_image_type and file_ext not in ALLOWED_IMAGE_EXTENSIONS:
             raise ValueError(f"Invalid image format. Allowed: {', '.join(ALLOWED_IMAGE_EXTENSIONS)}")
-        elif file_type == 'video' and file_ext not in ALLOWED_VIDEO_EXTENSIONS:
+        if (is_video_type or is_lipsync_type) and file_ext not in ALLOWED_VIDEO_EXTENSIONS:
             raise ValueError(f"Invalid video format. Allowed: {', '.join(ALLOWED_VIDEO_EXTENSIONS)}")
-        elif file_type in {'driver', 'target', 'result'} and file_ext not in ALLOWED_VIDEO_EXTENSIONS:
-            raise ValueError(f"Invalid video format. Allowed: {', '.join(ALLOWED_VIDEO_EXTENSIONS)}")
+
+        if not (is_image_type or is_video_type or is_lipsync_type):
+            raise ValueError("Invalid file_type")
 
         if not shot_dir.exists():
             get_shot_manager(self.project_path).create_shot_structure(shot_name)
 
-        if file_type in {'image', 'video'}:
-            wip_dir = shot_dir / ('images' if file_type == 'image' else 'videos')
-            version = self.get_next_version(wip_dir, shot_name, file_ext)
+        manager = get_shot_manager(self.project_path)
 
-            wip_filename = f'{shot_name}_v{version:03d}{file_ext}'
+        if is_image_type:
+            # Map legacy 'image' to 'first_image'
+            canonical_type = 'first_image' if file_type in {'image', 'first_image'} else 'last_image'
+            slot = 'first' if canonical_type == 'first_image' else 'last'
+            wip_dir = shot_dir / 'images'
+            base = f'{shot_name}_{slot}'
+            version = self.get_next_version(wip_dir, base, file_ext)
+
+            wip_filename = f'{base}_v{version:03d}{file_ext}'
             wip_path = wip_dir / wip_filename
             file.save(str(wip_path))
 
-            final_dir = self.latest_images_dir if file_type == 'image' else self.latest_videos_dir
-            final_filename = f'{shot_name}{file_ext}'
-            final_path = final_dir / final_filename
+            final_dir = self.latest_images_dir
+            final_path = final_dir / f'{base}{file_ext}'
 
-            for existing_file in final_dir.glob(f'{shot_name}.*'):
-                existing_file.unlink()
+            # Remove existing finals only for this slot (first/last)
+            for existing_file in final_dir.glob(f'{base}.*'):
+                if existing_file != wip_path:
+                    existing_file.unlink()
 
             shutil.copy2(str(wip_path), str(final_path))
+
             # Update current version marker so UI shows the promoted version correctly
             try:
-                manager = get_shot_manager(self.project_path)
-                manager.set_current_version(shot_name, file_type, version)
+                manager.set_current_version(shot_name, canonical_type, version)
             except Exception as e:
                 logger.warning("Failed to set current version marker: %s", e)
-            thumb_key = shot_name
 
             # Attempt to extract embedded prompt metadata from PNG files
             if file_ext == '.png':
@@ -90,13 +102,42 @@ class FileHandler:
                     if neg:
                         prompt_text += f"\n\nNegative: {neg}"
                     try:
-                        manager = get_shot_manager(self.project_path)
-                        manager.save_prompt(shot_name, 'image', version, prompt_text)
+                        manager.save_prompt(shot_name, canonical_type, version, prompt_text)
                         logger.info("Imported prompt from metadata for %s", final_path)
                     except Exception as e:
                         logger.warning('Failed to save imported prompt: %s', e)
                 else:
                     logger.info("No embedded prompt found in %s", final_path)
+
+            # Thumbnails for images
+            thumbnail_path = self.create_thumbnail(str(final_path), shot_name)
+
+        elif is_video_type:
+            wip_dir = shot_dir / 'videos'
+            base = shot_name
+            version = self.get_next_version(wip_dir, base, file_ext)
+
+            wip_filename = f'{base}_v{version:03d}{file_ext}'
+            wip_path = wip_dir / wip_filename
+            file.save(str(wip_path))
+
+            final_dir = self.latest_videos_dir
+            final_path = final_dir / f'{base}{file_ext}'
+
+            for existing_file in final_dir.glob(f'{base}.*'):
+                if existing_file != wip_path:
+                    existing_file.unlink()
+
+            shutil.copy2(str(wip_path), str(final_path))
+            # Update current version marker so UI shows the promoted version correctly
+            try:
+                manager.set_current_version(shot_name, 'video', version)
+            except Exception as e:
+                logger.warning("Failed to set current version marker: %s", e)
+
+            # Thumbnails for videos
+            thumbnail_path = self.create_video_thumbnail(str(final_path), base)
+
         else:
             # lipsync driver/target/result
             dest_dir = shot_dir / 'lipsync'
@@ -113,13 +154,9 @@ class FileHandler:
                     existing_file.unlink()
 
             shutil.copy2(str(wip_path), str(final_path))
-            thumb_key = base
 
-        thumbnail_path = None
-        if file_type == 'image':
-            thumbnail_path = self.create_thumbnail(str(final_path), shot_name)
-        else:
-            thumbnail_path = self.create_video_thumbnail(str(final_path), thumb_key)
+            # Thumbnails for lipsync videos
+            thumbnail_path = self.create_video_thumbnail(str(final_path), base)
 
         return {
             'wip_path': str(wip_path).replace('\\', '/'),
@@ -128,7 +165,7 @@ class FileHandler:
             'thumbnail': f"static/thumbnails/{Path(thumbnail_path).name}" if thumbnail_path else None
         }
 
-    def get_next_version(self, wip_dir, shot_name, file_ext):
+    def get_next_version(self, wip_dir, base_name, file_ext):
         if not wip_dir.exists():
             return 1
 
@@ -137,7 +174,7 @@ class FileHandler:
 
         existing_files = []
         for ext in allowed_extensions:
-            existing_files.extend(wip_dir.glob(f'{shot_name}_v*{ext}'))
+            existing_files.extend(wip_dir.glob(f'{base_name}_v*{ext}'))
 
         if not existing_files:
             return 1

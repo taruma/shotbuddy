@@ -75,7 +75,10 @@ class ShotManager:
         for sub in ["images", "videos"]:
             d = new_dir / sub
             if d.exists():
+                # Legacy pattern (e.g., SH001_v001.png) and new image patterns (e.g., SH001_first_v001.png)
                 for f in d.glob(f"{old_name}_v*.*"):
+                    f.rename(d / f.name.replace(old_name, new_name, 1))
+                for f in d.glob(f"{old_name}_*_v*.*"):
                     f.rename(d / f.name.replace(old_name, new_name, 1))
 
         lipsync_dir = new_dir / "lipsync"
@@ -89,13 +92,27 @@ class ShotManager:
                     f.rename(lipsync_dir / f.name.replace(old_name, new_name, 1))
 
         for ext in ALLOWED_IMAGE_EXTENSIONS:
+            # Legacy single-image final
             src = self.latest_images_dir / f"{old_name}{ext}"
             if src.exists():
                 src.rename(self.latest_images_dir / f"{new_name}{ext}")
-        # Rename image version marker if present
+            # New first/last finals
+            src_first = self.latest_images_dir / f"{old_name}_first{ext}"
+            if src_first.exists():
+                src_first.rename(self.latest_images_dir / f"{new_name}_first{ext}")
+            src_last = self.latest_images_dir / f"{old_name}_last{ext}"
+            if src_last.exists():
+                src_last.rename(self.latest_images_dir / f"{new_name}_last{ext}")
+        # Rename image version markers if present
         img_marker = self.latest_images_dir / f"{old_name}.version"
         if img_marker.exists():
             img_marker.rename(self.latest_images_dir / f"{new_name}.version")
+        img_marker_first = self.latest_images_dir / f"{old_name}_first.version"
+        if img_marker_first.exists():
+            img_marker_first.rename(self.latest_images_dir / f"{new_name}_first.version")
+        img_marker_last = self.latest_images_dir / f"{old_name}_last.version"
+        if img_marker_last.exists():
+            img_marker_last.rename(self.latest_images_dir / f"{new_name}_last.version")
 
         for ext in ALLOWED_VIDEO_EXTENSIONS:
             src = self.latest_videos_dir / f"{old_name}{ext}"
@@ -284,16 +301,36 @@ class ShotManager:
                 pass
 
 
-        # Latest image
-        latest_image, max_image_version = self._get_latest_asset(
+        # First/Last images
+        # New naming for first frame
+        first_image_path, first_max_version = self._get_latest_asset(
+            self.latest_images_dir, shot_dir / 'images',
+            f'{shot_name}_first', ALLOWED_IMAGE_EXTENSIONS
+        )
+        # Backward compatibility for first frame (legacy single image)
+        legacy_image_path, legacy_max_version = self._get_latest_asset(
             self.latest_images_dir, shot_dir / 'images',
             shot_name, ALLOWED_IMAGE_EXTENSIONS
         )
-        latest_image = self._normalize_path(latest_image)
-        current_image_version = self.get_current_version(shot_name, 'image', max_image_version)
-        image_prompt = ''
-        if current_image_version > 0:
-            image_prompt = self.load_prompt(shot_name, 'image', current_image_version)
+        use_legacy_for_first = (not first_image_path and first_max_version == 0 and (legacy_image_path or legacy_max_version > 0))
+        if use_legacy_for_first:
+            first_image_path = legacy_image_path
+            first_max_version = legacy_max_version
+
+        # New naming for last frame
+        last_image_path, last_max_version = self._get_latest_asset(
+            self.latest_images_dir, shot_dir / 'images',
+            f'{shot_name}_last', ALLOWED_IMAGE_EXTENSIONS
+        )
+
+        first_image_path = self._normalize_path(first_image_path)
+        last_image_path = self._normalize_path(last_image_path)
+
+        current_first_version = self.get_current_version(shot_name, 'first_image', first_max_version)
+        first_prompt = self.load_prompt(shot_name, 'first_image', current_first_version) if current_first_version > 0 else ''
+
+        current_last_version = self.get_current_version(shot_name, 'last_image', last_max_version)
+        last_prompt = self.load_prompt(shot_name, 'last_image', current_last_version) if current_last_version > 0 else ''
 
         # Latest video
         latest_video, max_video_version = self._get_latest_asset(
@@ -321,30 +358,44 @@ class ShotManager:
             lipsync[part] = {
                 'file': file_path,
                 'version': ver,
-                'thumbnail': None,  # will be replaced with image thumb below
+                'thumbnail': None,  # will be replaced with video thumb below
                 'prompt': prompt_text,
             }
 
         # Thumbnails
-        image_thumb = self.get_thumbnail_path(Path(latest_image), shot_name) if latest_image else None
+        first_thumb = self.get_thumbnail_path(Path(first_image_path), shot_name) if first_image_path else None
+        last_thumb = self.get_thumbnail_path(Path(last_image_path), shot_name) if last_image_path else None
         video_thumb = self.get_video_thumbnail_path(Path(latest_video), shot_name) if latest_video else None
 
         for part_name, info in lipsync.items():
             info['thumbnail'] = self.get_video_thumbnail_path(Path(info['file']), f"{shot_name}_{part_name}") if info['file'] else None
 
-        logger.debug("%s -> Image thumbnail: %s", shot_name, image_thumb)
+        logger.debug("%s -> First image thumbnail: %s", shot_name, first_thumb)
+        logger.debug("%s -> Last image thumbnail: %s", shot_name, last_thumb)
         logger.debug("%s -> Video thumbnail: %s", shot_name, video_thumb)
+
+        # Compose response with backward-compatible 'image' alias pointing to first_image
+        first_image_dict = {
+            'file': first_image_path,
+            'current_version': current_first_version,
+            'max_version': first_max_version,
+            'thumbnail': first_thumb,
+            'prompt': first_prompt,
+        }
+        last_image_dict = {
+            'file': last_image_path,
+            'current_version': current_last_version,
+            'max_version': last_max_version,
+            'thumbnail': last_thumb,
+            'prompt': last_prompt,
+        }
 
         return {
             'name': shot_name,
             'notes': notes,
-            'image': {
-                'file': latest_image,
-                'current_version': current_image_version,
-                'max_version': max_image_version,
-                'thumbnail': image_thumb,
-                'prompt': image_prompt,
-            },
+            'first_image': first_image_dict,
+            'last_image': last_image_dict,
+            'image': first_image_dict,  # backward compatibility
             'video': {
                 'file': latest_video,
                 'current_version': current_video_version,
@@ -388,7 +439,12 @@ class ShotManager:
 
     def _version_marker_path(self, asset_type, shot_name):
         if asset_type == 'image':
+            # Legacy single-image marker (pre-split)
             return self.latest_images_dir / f"{shot_name}.version"
+        elif asset_type == 'first_image':
+            return self.latest_images_dir / f"{shot_name}_first.version"
+        elif asset_type == 'last_image':
+            return self.latest_images_dir / f"{shot_name}_last.version"
         elif asset_type == 'video':
             return self.latest_videos_dir / f"{shot_name}.version"
         elif asset_type in {'driver', 'target', 'result'}:
@@ -398,16 +454,30 @@ class ShotManager:
 
     def get_current_version(self, shot_name, asset_type, max_version):
         """Read the currently promoted version from a marker file. Fallback to max_version."""
+        def _read_marker(p):
+            try:
+                if p.exists():
+                    v = int(p.read_text(encoding='utf-8').strip())
+                    if max_version == 0:
+                        return v
+                    if 1 <= v <= max_version:
+                        return v
+            except Exception:
+                pass
+            return None
+
         marker = self._version_marker_path(asset_type, shot_name)
-        try:
-            if marker.exists():
-                v = int(marker.read_text(encoding='utf-8').strip())
-                if max_version == 0:
-                    return v
-                if 1 <= v <= max_version:
-                    return v
-        except Exception:
-            pass
+        v = _read_marker(marker)
+        if v is not None:
+            return v
+
+        # Backward-compatibility: first_image falls back to legacy 'image' marker
+        if asset_type == 'first_image':
+            legacy_marker = self._version_marker_path('image', shot_name)
+            v = _read_marker(legacy_marker)
+            if v is not None:
+                return v
+
         return max_version
 
     def set_current_version(self, shot_name, asset_type, version):
@@ -417,30 +487,81 @@ class ShotManager:
         marker.write_text(str(int(version)), encoding='utf-8')
 
     def promote_asset(self, shot_name, asset_type, version):
-        """Promote a specific WIP version to be the current final for image/video."""
+        """Promote a specific WIP version to be the current final for image variants/video."""
         validate_shot_name(shot_name)
-        if asset_type not in {'image', 'video'}:
+        if asset_type not in {'image', 'first_image', 'last_image', 'video'}:
             raise ValueError('Invalid asset type')
 
         shot_dir = self.wip_dir / shot_name
-        wip_dir = shot_dir / ('images' if asset_type == 'image' else 'videos')
-        if not wip_dir.exists():
-            raise ValueError(f"No {asset_type} WIP directory for shot {shot_name}")
 
-        exts = ALLOWED_IMAGE_EXTENSIONS if asset_type == 'image' else ALLOWED_VIDEO_EXTENSIONS
+        import shutil as _shutil
+
+        if asset_type in {'image', 'first_image', 'last_image'}:
+            slot = 'first' if asset_type in {'image', 'first_image'} else 'last'
+            wip_dir = shot_dir / 'images'
+            if not wip_dir.exists():
+                raise ValueError(f"No image WIP directory for shot {shot_name}")
+
+            # Find source: prefer new naming, then legacy (for first slot)
+            src = None
+            for ext in ALLOWED_IMAGE_EXTENSIONS:
+                candidate = wip_dir / f'{shot_name}_{slot}_v{int(version):03d}{ext}'
+                if candidate.exists():
+                    src = candidate
+                    break
+            if src is None and slot == 'first':
+                for ext in ALLOWED_IMAGE_EXTENSIONS:
+                    legacy = wip_dir / f'{shot_name}_v{int(version):03d}{ext}'
+                    if legacy.exists():
+                        src = legacy
+                        break
+            if src is None:
+                raise ValueError(f"Version v{int(version):03d} not found for {shot_name} {asset_type}")
+
+            final_dir = self.latest_images_dir
+            final_dir.mkdir(parents=True, exist_ok=True)
+
+            # Remove existing finals for this slot
+            for existing in final_dir.glob(f"{shot_name}_{slot}.*"):
+                try:
+                    existing.unlink()
+                except Exception:
+                    pass
+
+            final_path = final_dir / f"{shot_name}_{slot}{src.suffix}"
+            _shutil.copy2(str(src), str(final_path))
+
+            # Update marker and regenerate thumbnail
+            self.set_current_version(shot_name, 'first_image' if slot == 'first' else 'last_image', int(version))
+            try:
+                final_stem = Path(final_path).stem
+                thumb_filename = f"{shot_name}_{final_stem}_thumb.jpg"
+                old_thumb = THUMBNAIL_CACHE_DIR / thumb_filename
+                if old_thumb.exists():
+                    old_thumb.unlink()
+            except Exception:
+                pass
+
+            _ = self.get_thumbnail_path(final_path, shot_name)
+            return self._normalize_path(final_path)
+
+        # Video
+        wip_dir = shot_dir / 'videos'
+        if not wip_dir.exists():
+            raise ValueError(f"No video WIP directory for shot {shot_name}")
+
         src = None
-        for ext in exts:
+        for ext in ALLOWED_VIDEO_EXTENSIONS:
             candidate = wip_dir / f'{shot_name}_v{int(version):03d}{ext}'
             if candidate.exists():
                 src = candidate
                 break
         if not src:
-            raise ValueError(f"Version v{int(version):03d} not found for {shot_name} {asset_type}")
+            raise ValueError(f"Version v{int(version):03d} not found for {shot_name} video")
 
-        final_dir = self.latest_images_dir if asset_type == 'image' else self.latest_videos_dir
+        final_dir = self.latest_videos_dir
         final_dir.mkdir(parents=True, exist_ok=True)
 
-        # Remove existing finals for this shot
         for existing in final_dir.glob(f"{shot_name}.*"):
             try:
                 existing.unlink()
@@ -448,29 +569,19 @@ class ShotManager:
                 pass
 
         final_path = final_dir / f"{shot_name}{src.suffix}"
-        import shutil as _shutil
         _shutil.copy2(str(src), str(final_path))
 
-        # Update marker and regenerate thumbnail
-        self.set_current_version(shot_name, asset_type, int(version))
-        # Remove old thumbnail so it will be regenerated for the new final
+        self.set_current_version(shot_name, 'video', int(version))
         try:
             final_stem = Path(final_path).stem
-            if asset_type == 'image':
-                thumb_filename = f"{shot_name}_{final_stem}_thumb.jpg"
-            else:
-                thumb_filename = f"{shot_name}_{final_stem}_vthumb.jpg"
+            thumb_filename = f"{shot_name}_{final_stem}_vthumb.jpg"
             old_thumb = THUMBNAIL_CACHE_DIR / thumb_filename
             if old_thumb.exists():
                 old_thumb.unlink()
         except Exception:
             pass
 
-        if asset_type == 'image':
-            _ = self.get_thumbnail_path(final_path, shot_name)
-        else:
-            _ = self.get_video_thumbnail_path(final_path, shot_name)
-
+        _ = self.get_video_thumbnail_path(final_path, shot_name)
         return self._normalize_path(final_path)
 
     def save_shot_notes(self, shot_name, notes):
@@ -490,9 +601,15 @@ class ShotManager:
     def _prompt_file_path(self, shot_name, asset_type, version):
         """Return the path to the prompt file for a specific asset version."""
         shot_dir = self.wip_dir / shot_name
-        if asset_type == 'image':
+        if asset_type in {'image', 'first_image'}:
             base_dir = shot_dir / 'images'
-            filename = f'{shot_name}_v{version:03d}_image_prompt.txt'
+            if asset_type == 'image':
+                filename = f'{shot_name}_v{version:03d}_image_prompt.txt'
+            else:
+                filename = f'{shot_name}_first_v{version:03d}_image_prompt.txt'
+        elif asset_type == 'last_image':
+            base_dir = shot_dir / 'images'
+            filename = f'{shot_name}_last_v{version:03d}_image_prompt.txt'
         elif asset_type == 'video':
             base_dir = shot_dir / 'videos'
             filename = f'{shot_name}_v{version:03d}_video_prompt.txt'
@@ -511,6 +628,15 @@ class ShotManager:
                     return f.read().strip()
             except Exception:
                 return ''
+        # Backward-compatibility: if first_image not found, try legacy 'image'
+        if asset_type == 'first_image':
+            legacy_path = self._prompt_file_path(shot_name, 'image', version)
+            if legacy_path.exists():
+                try:
+                    with open(legacy_path, 'r', encoding='utf-8') as f:
+                        return f.read().strip()
+                except Exception:
+                    return ''
         return ''
 
     def save_prompt(self, shot_name, asset_type, version, prompt):
@@ -527,31 +653,41 @@ class ShotManager:
     def get_prompt_versions(self, shot_name, asset_type):
         """Return a sorted list of prompt versions for the given asset."""
         shot_dir = self.wip_dir / shot_name
-        if asset_type == 'image':
+
+        patterns = []
+        base_dir = None
+        if asset_type in {'image', 'first_image'}:
             base_dir = shot_dir / 'images'
-            pattern = f'{shot_name}_v*_image_prompt.txt'
+            patterns = [
+                f'{shot_name}_v*_image_prompt.txt',          # legacy
+                f'{shot_name}_first_v*_image_prompt.txt'     # new first
+            ]
+        elif asset_type == 'last_image':
+            base_dir = shot_dir / 'images'
+            patterns = [f'{shot_name}_last_v*_image_prompt.txt']
         elif asset_type == 'video':
             base_dir = shot_dir / 'videos'
-            pattern = f'{shot_name}_v*_video_prompt.txt'
+            patterns = [f'{shot_name}_v*_video_prompt.txt']
         elif asset_type in {'driver', 'target', 'result'}:
             base_dir = shot_dir / 'lipsync'
-            pattern = f'{shot_name}_{asset_type}_v*_prompt.txt'
+            patterns = [f'{shot_name}_{asset_type}_v*_prompt.txt']
         else:
             raise ValueError('Invalid asset type')
 
-        versions = []
-        if base_dir.exists():
-            for f in base_dir.glob(pattern):
-                stem = f.stem
-                if '_v' not in stem:
-                    continue
-                try:
-                    part = stem.split('_v')[1]
-                    ver_str = part.split('_')[0]
-                    versions.append(int(ver_str))
-                except (IndexError, ValueError):
-                    continue
-        return sorted(set(versions))
+        versions = set()
+        if base_dir and base_dir.exists():
+            for pattern in patterns:
+                for f in base_dir.glob(pattern):
+                    stem = f.stem
+                    if '_v' not in stem:
+                        continue
+                    try:
+                        part = stem.split('_v')[1]
+                        ver_str = part.split('_')[0]
+                        versions.add(int(ver_str))
+                    except (IndexError, ValueError):
+                        continue
+        return sorted(versions)
 
     def get_thumbnail_path(self, image_path, shot_name):
         """Return (and create if necessary) the thumbnail for an image."""
