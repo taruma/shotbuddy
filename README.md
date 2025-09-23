@@ -28,7 +28,7 @@ Using uv
 2. Clone the repository
 
    ```bash
-   git clone https://github.com/albozes/shotbuddy.git
+   git clone https://github.com/taruma/shotbuddy.git
    ```
    ```bash
    cd shotbuddy
@@ -102,6 +102,10 @@ Via the "P" button on each asset thumbnail, prompts can be documented. A version
 Notes on individual shots can be made easily.
 
 ![Shotbuddy_04](https://github.com/user-attachments/assets/7567416e-3f4b-42d0-888c-b8296b261616)
+
+## Attribution
+- Forked from Shotbuddy by Albert Bozesan: https://github.com/albozes/shotbuddy (MIT License).
+- Maintained and extended by Taruma Sakti.
 
 ## License
 This project is licensed under the [MIT License](./LICENSE.txt).

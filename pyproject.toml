@@ -8,13 +8,21 @@ version = "0.1.0"
 description = "AI-driven image-to-video filmmaking workflow manager"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
-authors = [{ name = "Shotbuddy Authors" }]
+authors = [
+  { name = "Taruma Sakti" },
+  { name = "Albert Bozesan" }
+]
 requires-python = ">=3.9"
 dependencies = [
   "flask",
   "flask-cors",
   "pillow",
 ]
+
+[project.urls]
+Homepage = "https://github.com/taruma/shotbuddy"
+Repository = "https://github.com/taruma/shotbuddy"
+Issues = "https://github.com/taruma/shotbuddy/issues"
 
 [tool.uv]
 package = false
