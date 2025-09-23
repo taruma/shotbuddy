@@ -18,6 +18,15 @@ Key features include:
 - **Dependencies**: flask, flask-cors, pillow, python-dotenv
 - **Build Tool**: uv (package manager and virtual environment tool)
 
+## Development Tooling
+This project uses `uv` as the primary tool for all Python development tasks including dependency management, running scripts, and virtual environment handling. 
+
+**Important**: Avoid using `pip install` directly. Instead, use `uv` commands for all dependency management:
+- Use `uv add package_name` to add new dependencies
+- Use `uv remove package_name` to remove dependencies
+- Use `uv sync` to install all project dependencies
+- Use `uv run script_name.py` to run Python scripts
+
 ## Project Structure
 ```
 shotbuddy/
@@ -51,6 +60,8 @@ shotbuddy/
    ```bash
    uv sync
    ```
+   
+**Note**: This project uses `uv` for all dependency management. Do not use `pip install` directly as it may cause dependency conflicts or inconsistencies.
 
 ### Running the Application
 1. Start the development server:
@@ -80,6 +91,7 @@ Environment variables can override config file settings:
 - Thumbnail caching in project-specific directories
 - Version-controlled shot naming scheme (SH### or SH###_###)
 - Asset versioning with _v### suffix
+- All development tasks should use `uv` as the primary tool for dependency management and script execution
 
 ## Key Components
 - **ShotManager**: Core service for shot operations, file management, and metadata handling
