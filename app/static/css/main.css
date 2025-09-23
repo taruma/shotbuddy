@@ -735,13 +735,50 @@
             background: #111;
         }
 
-        /* Archived section styling */
-        .section-title {
+        /* Collapsible Archived section styling */
+        .archived-section {
             margin: 16px 20px 8px;
-            color: #b5b5b5;
-            font-size: 14px;
             border-top: 1px solid #333;
             padding-top: 8px;
+        }
+
+        .archived-header {
+            width: 100%;
+            background: transparent;
+            color: #b5b5b5;
+            font-size: 14px;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 0;
+            cursor: pointer;
+            text-align: left;
+            transition: color 0.2s;
+        }
+
+        .archived-header:hover {
+            color: #e5e5e5;
+        }
+
+        .archived-header .chevron {
+            font-size: 12px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .archived-header .count {
+            margin-left: 6px;
+            opacity: 0.8;
+            font-size: 13px;
+        }
+
+        .archived-content {
+            display: none;
+        }
+
+        .archived-section.open .archived-content {
+            display: block;
         }
 
         .shot-name .archive-btn {
@@ -909,4 +946,47 @@
         .reorder-item .shot-code {
             font-size: 11px;
             margin-left: 6px;
+        }
+
+        /* Manual path fallback layout and spacing */
+        .manual-path-fallback {
+            display: none;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 10px 0 12px;
+        }
+
+        .manual-path-fallback .path-input {
+            flex: 1;
+            width: clamp(260px, 40vw, 700px);
+        }
+
+        /* Link-like control for the "Manual path input..." trigger */
+        .link-button {
+            background: transparent;
+            border: 0;
+            color: #b5b5b5;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 2px 0;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            text-decoration-color: #555;
+        }
+
+        .link-button:hover {
+            color: #e5e5e5;
+            text-decoration-color: currentColor;
+        }
+
+        /* Modal spacing improvements */
+        .modal-buttons {
+            margin-top: 20px;
+        }
+
+        #create-project-modal .modal-content {
+            width: 520px;
+            max-width: 95vw;
+            text-align: left;
         }

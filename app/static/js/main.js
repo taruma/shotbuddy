@@ -145,10 +145,16 @@
 
         function toggleManualPath() {
             const fallback = document.getElementById('manual-path-fallback');
-            if (fallback.style.display === 'none') {
-                fallback.style.display = 'block';
-            } else {
-                fallback.style.display = 'none';
+            const toggle = document.getElementById('manual-path-toggle');
+            const showing = (fallback.style.display === 'none' || !fallback.style.display);
+            fallback.style.display = showing ? 'flex' : 'none';
+            if (toggle) toggle.setAttribute('aria-expanded', showing ? 'true' : 'false');
+            if (showing) {
+                const input = document.getElementById('manual-path-input');
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
             }
         }
 
@@ -602,22 +608,45 @@
 
             shotList.appendChild(activeContainer);
 
-            // Archived section
+            // Archived section (collapsible)
             if (archivedShots.length > 0) {
-                const title = document.createElement("div");
-                title.className = "section-title";
-                title.textContent = "Archived";
-                shotList.appendChild(title);
+                const archivedSection = document.createElement("div");
+                archivedSection.id = "archived-section";
+                archivedSection.className = "archived-section";
+                
+                // Check localStorage for saved state, default to closed
+                const isArchivedOpen = localStorage.getItem('archivedOpen') === 'true';
+                if (isArchivedOpen) {
+                    archivedSection.classList.add('open');
+                }
 
+                // Create header with toggle button
+                const archivedHeader = document.createElement("button");
+                archivedHeader.className = "archived-header";
+                archivedHeader.setAttribute('aria-expanded', isArchivedOpen ? 'true' : 'false');
+                archivedHeader.setAttribute('aria-controls', 'archived-shot-list');
+                archivedHeader.innerHTML = `
+                    <span class="chevron" aria-hidden="true">${isArchivedOpen ? '▾' : '▸'}</span>
+                    <span>Archived</span>
+                    <span class="count">(${archivedShots.length})</span>
+                `;
+                
+                archivedHeader.addEventListener('click', toggleArchivedSection);
+                
+                // Create content container
                 const archivedContainer = document.createElement("div");
                 archivedContainer.id = "archived-shot-list";
+                archivedContainer.className = "archived-content";
+                archivedContainer.style.display = isArchivedOpen ? 'block' : 'none';
 
                 archivedShots.forEach(shot => {
                     const row = createShotRow(shot);
                     archivedContainer.appendChild(row);
                 });
 
-            shotList.appendChild(archivedContainer);
+                archivedSection.appendChild(archivedHeader);
+                archivedSection.appendChild(archivedContainer);
+                shotList.appendChild(archivedSection);
             }
 
             // Initialize auto-resize for all existing .notes-input elements
@@ -628,6 +657,21 @@
             // Render and update TOC
             renderTOC();
             positionToc(); // Re-calculate position in case grid changed
+        }
+
+        function toggleArchivedSection() {
+            const archivedSection = document.getElementById('archived-section');
+            const archivedContent = document.getElementById('archived-shot-list');
+            const archivedHeader = this;
+            const chevron = archivedHeader.querySelector('.chevron');
+            
+            const isOpen = archivedSection.classList.toggle('open');
+            archivedContent.style.display = isOpen ? 'block' : 'none';
+            archivedHeader.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            chevron.textContent = isOpen ? '▾' : '▸';
+            
+            // Persist state to localStorage
+            localStorage.setItem('archivedOpen', isOpen ? 'true' : 'false');
         }
 
         function initSortable() {

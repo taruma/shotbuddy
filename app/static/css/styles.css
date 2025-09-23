@@ -178,6 +178,19 @@ body.light {
     background: #f2f2f2;
 }
 
+/* Light theme overrides for collapsible archived section */
+.light .archived-section {
+    border-top: 1px solid #e5e5e5;
+}
+
+.light .archived-header {
+    color: #777;
+}
+
+.light .archived-header:hover {
+    color: #000;
+}
+
 /* Subdued shot code styling */
 .shot-code {
     opacity: 0.6;
@@ -431,4 +444,14 @@ body.light {
 
 .light .recent-project-path {
     color: #777;
+}
+
+/* Light Theme Overrides for link-button */
+.light .link-button {
+    color: #555;
+    text-decoration-color: #bbb;
+}
+
+.light .link-button:hover {
+    color: #000;
 }
