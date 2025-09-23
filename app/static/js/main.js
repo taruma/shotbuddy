@@ -13,6 +13,11 @@
             textarea.style.height = textarea.scrollHeight + 'px';
         }
 
+        // Resize all notes textareas (e.g. after grid becomes visible)
+        function autoResizeAllNotes() {
+            document.querySelectorAll('.notes-input').forEach(autoResize);
+        }
+
         // Wire auto-resize to all current and future .notes-input elements
         document.addEventListener('input', (e) => {
             if (e.target && e.target.classList && e.target.classList.contains('notes-input')) {
@@ -204,6 +209,8 @@
                     renderShots();
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('shot-grid').style.display = 'block';
+                    // Ensure layout is visible before measuring scrollHeight
+                    requestAnimationFrame(() => requestAnimationFrame(autoResizeAllNotes));
                     restoreScroll();
                 } else {
                     showNotification(result.error || 'Failed to load shots', 'error');
