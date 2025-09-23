@@ -97,7 +97,7 @@ def open_project():
         project_manager.projects['current_project'] = path_str
         if path_str not in project_manager.projects['recent_projects']:
             project_manager.projects['recent_projects'].insert(0, path_str)
-            project_manager.projects['recent_projects'] = project_manager.projects['recent_projects'][:5]
+            project_manager.projects['recent_projects'] = project_manager.projects['recent_projects'][:3]
 
         last_scanned = project_manager.projects.get('last_scanned', {}).get(path_str)
         folder_mtime = project_path.stat().st_mtime

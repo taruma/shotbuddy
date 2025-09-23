@@ -32,7 +32,7 @@ class ProjectManager:
                         self.projects['current_project'] = str(Path(self.projects['current_project']).resolve())
                     self.projects['recent_projects'] = [
                         str(Path(p).resolve()) for p in self.projects.get('recent_projects', [])
-                    ]
+                    ][:3]  # Limit to 3 recent projects
                     loaded_scanned = self.projects.get('last_scanned', {})
                     self.projects['last_scanned'] = {
                         str(Path(p).resolve()): ts for p, ts in loaded_scanned.items()
@@ -78,7 +78,7 @@ class ProjectManager:
         self.projects['current_project'] = path_str
         if path_str not in self.projects['recent_projects']:
             self.projects['recent_projects'].insert(0, path_str)
-            self.projects['recent_projects'] = self.projects['recent_projects'][:5]
+            self.projects['recent_projects'] = self.projects['recent_projects'][:3]
         self.save_projects()
 
     def get_current_project(self):
