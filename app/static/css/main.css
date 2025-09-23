@@ -1050,6 +1050,37 @@
             margin-top: 2px;
         }
 
+        /* Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.4;
+            z-index: 10000;
+            max-width: 300px;
+            word-wrap: break-word;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            text-align: left;
+            white-space: normal;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Light theme tooltip */
+        .light .tooltip {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a1a;
+            border: 1px solid #ddd;
+        }
+
         /* Light theme override */
         .light .back-to-top {
             background: #00c851;

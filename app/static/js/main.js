@@ -226,6 +226,7 @@
             createTocUI(); // Inject TOC panel and toggle button
             window.addEventListener('resize', positionToc); // Re-position on resize
             checkForProject();
+            initTooltips(); // Initialize tooltip functionality
         });
 
         function handlePromptButtonClick(event) {
@@ -678,6 +679,9 @@
             // Render and update TOC
             renderTOC();
             positionToc(); // Re-calculate position in case grid changed
+            
+            // Reinitialize tooltips after rendering
+            setTimeout(initTooltips, 100);
         }
 
         function toggleArchivedSection() {
@@ -1619,7 +1623,101 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Expose functions globally
-window.openReorderModal = openReorderModal;
-window.closeReorderModal = closeReorderModal;
-window.saveReorder = saveReorder;
+        // Tooltip functionality
+        function initTooltips() {
+            // Create tooltip element if it doesn't exist
+            let tooltip = document.getElementById('prompt-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'prompt-tooltip';
+                tooltip.className = 'tooltip';
+                document.body.appendChild(tooltip);
+            }
+
+            // Add event listeners for mouse enter/leave on preview thumbnails
+            document.addEventListener('mouseover', function(e) {
+                const thumbnail = e.target.closest('.preview-thumbnail, .video-thumbnail');
+                if (!thumbnail) return;
+
+                // Get the closest drop zone to find prompt data
+                const dropZone = thumbnail.closest('.drop-zone');
+                if (!dropZone) return;
+
+                // Extract shot name and type from the drop zone
+                const filePreview = dropZone.querySelector('.file-preview');
+                if (!filePreview) return;
+
+                const promptButton = filePreview.querySelector('.prompt-button');
+                if (!promptButton) return;
+
+                const shotName = promptButton.dataset.shot;
+                const assetType = promptButton.dataset.type;
+                const currentVersion = promptButton.dataset.currentVersion;
+
+                if (!shotName || !assetType || !currentVersion) return;
+
+                // Find the shot object to get the prompt
+                const shot = shots.find(s => s.name === shotName);
+                if (!shot || !shot[assetType] || !shot[assetType].prompt) return;
+
+                const prompt = shot[assetType].prompt;
+                if (!prompt.trim()) return;
+
+                // Set tooltip content
+                tooltip.textContent = prompt;
+
+                // Show tooltip
+                tooltip.classList.add('show');
+
+                // Position tooltip near the mouse
+                positionTooltip(tooltip, e);
+            });
+
+            document.addEventListener('mouseout', function(e) {
+                const thumbnail = e.target.closest('.preview-thumbnail, .video-thumbnail');
+                if (thumbnail) {
+                    const tooltip = document.getElementById('prompt-tooltip');
+                    if (tooltip) {
+                        tooltip.classList.remove('show');
+                    }
+                }
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                const thumbnail = e.target.closest('.preview-thumbnail, .video-thumbnail');
+                if (thumbnail) {
+                    const tooltip = document.getElementById('prompt-tooltip');
+                    if (tooltip && tooltip.classList.contains('show')) {
+                        positionTooltip(tooltip, e);
+                    }
+                }
+            });
+        }
+
+        function positionTooltip(tooltip, event) {
+            const padding = 10;
+            // Account for page scroll position to position tooltip correctly
+            const x = event.clientX + window.scrollX + padding;
+            const y = event.clientY + window.scrollY + padding;
+
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+
+            // Check if tooltip goes off screen and adjust if needed
+            const rect = tooltip.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            if (rect.right > windowWidth) {
+                tooltip.style.left = (event.clientX + window.scrollX - rect.width - padding) + 'px';
+            }
+
+            if (rect.bottom > windowHeight) {
+                tooltip.style.top = (event.clientY + window.scrollY - rect.height - padding) + 'px';
+            }
+        }
+
+        // Expose functions globally
+        window.openReorderModal = openReorderModal;
+        window.closeReorderModal = closeReorderModal;
+        window.saveReorder = saveReorder;
