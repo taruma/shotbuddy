@@ -7,12 +7,14 @@ import sys
 logger = logging.getLogger(__name__)
 
 from app.services.shot_manager import get_shot_manager, clear_shot_manager_cache
+from app.utils import get_app_version
 
 project_bp = Blueprint('project', __name__)
 
 @project_bp.route("/")
 def index():
-    return render_template("index.html")
+    version = get_app_version()
+    return render_template("index.html", version=version)
 
 @project_bp.route("/api/project/current")
 def get_current_project():
