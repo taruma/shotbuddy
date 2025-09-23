@@ -178,6 +178,24 @@ body.light {
     background: #f2f2f2;
 }
 
+/* Subdued shot code styling */
+.shot-code {
+    opacity: 0.6;
+}
+
+.light .shot-code {
+    color: #777;
+    opacity: 1;
+}
+
+/* Grid-specific shot code (below display name) */
+.shot-name .shot-code {
+    display: block;
+    font-size: 12px;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
 /* Table of Shots Panel */
 .shot-toc {
     position: fixed;

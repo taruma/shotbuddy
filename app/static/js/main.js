@@ -326,7 +326,9 @@
             activeShots.forEach(shot => {
                 const item = document.createElement('li');
                 item.className = 'toc-item';
-                item.textContent = shot.name;
+                item.innerHTML = shot.display_name
+                    ? `${escapeHtml(shot.display_name)} <span class="shot-code">(${shot.name})</span>`
+                    : shot.name;
                 item.dataset.target = `shot-row-${shot.name}`;
                 item.addEventListener('click', () => scrollToShot(shot.name));
                 activeList.appendChild(item);
@@ -345,7 +347,9 @@
                 archivedShots.forEach(shot => {
                     const item = document.createElement('li');
                     item.className = 'toc-item archived';
-                    item.textContent = shot.name;
+                    item.innerHTML = shot.display_name
+                        ? `${escapeHtml(shot.display_name)} <span class="shot-code">(${shot.name})</span>`
+                        : shot.name;
                     item.dataset.target = `shot-row-${shot.name}`;
                     item.addEventListener('click', () => scrollToShot(shot.name));
                     archivedList.appendChild(item);
@@ -540,6 +544,13 @@
             });
         }
 
+        // Helper to safely escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function createShotRow(shot) {
             const row = document.createElement('div');
             row.className = 'shot-row' + (shot.archived ? ' archived' : '');
@@ -547,6 +558,10 @@
 
             const actionLabel = shot.archived ? 'Unarchive' : 'Archive';
             const actionNext = shot.archived ? false : true;
+            
+            const labelText = shot.display_name
+                ? `${escapeHtml(shot.display_name)}<div class="shot-code">(${shot.name})</div>`
+                : shot.name;
             
             row.innerHTML = `
                 <div class="action-cell">
@@ -556,7 +571,7 @@
                             : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line><rect x="3" y="15" width="18" height="6" rx="2"></rect></svg>'}
                     </button>
                 </div>
-                <div class="shot-name" onclick="editShotName(this, '${shot.name}')">${shot.name}</div>
+                <div class="shot-name" onclick="editDisplayName(this, '${shot.name}')">${labelText}</div>
                 ${createDropZone(shot, 'first_image')}
                 ${createDropZone(shot, 'last_image')}
                 ${createDropZone(shot, 'video')}
@@ -568,6 +583,9 @@
                               onblur="saveNotes('${shot.name}', this.value)">${shot.notes || ''}</textarea>
                 </div>
             `;
+            
+            // Set data attribute for display name to avoid quote issues in onclick
+            row.querySelector('.shot-name').dataset.displayName = shot.display_name || '';
             
             return row;
         }
@@ -1003,6 +1021,49 @@ async function renameShot(oldName, newName) {
         showNotification('Rename failed', 'error');
     }
 }
+
+async function saveDisplayName(shotName, displayName) {
+    try {
+        const response = await fetch('/api/shots/display-name', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ shot_name: shotName, display_name: displayName })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showNotification(`Display name updated`);
+            const idx = shots.findIndex(s => s.name === shotName);
+            if (idx !== -1) {
+                shots[idx] = result.data;
+            }
+            captureScroll(`shot-row-${shotName}`);
+            renderShots();
+            restoreScroll();
+        } else {
+            showNotification(result.error || 'Failed to update display name', 'error');
+        }
+    } catch (e) {
+        console.error('Save display name failed:', e);
+        showNotification('Failed to update display name', 'error');
+    }
+}
+
+// Expose globally for inline onclick
+window.saveDisplayName = saveDisplayName;
+
+function editDisplayName(element, shotName) {
+    const currentDisplayName = element.dataset.displayName || '';
+    const newDisplayName = prompt('Enter display name (leave empty to show only SHXXX)', currentDisplayName);
+    if (newDisplayName === null || newDisplayName === currentDisplayName) {
+        return;
+    }
+    // Update data attribute immediately for UI consistency
+    element.dataset.displayName = newDisplayName;
+    saveDisplayName(shotName, newDisplayName);
+}
+
+// Expose globally for inline onclick
+window.editDisplayName = editDisplayName;
 
 async function archiveShot(shotName, archived) {
     try {

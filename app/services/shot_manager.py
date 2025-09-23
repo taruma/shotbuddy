@@ -2,6 +2,7 @@ from pathlib import Path
 from PIL import Image
 import logging
 import re
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,38 @@ def _format_shot_parts(parts):
     for p in parts[1:]:
         base += f"_{p:03d}"
     return base
+
+
+def _meta_file(shot_name):
+    """Return path to the meta JSON for a shot."""
+    return Path("shots") / "wip" / shot_name / "meta.json"
+
+
+def load_meta(shot_name):
+    """Load meta dict for a shot."""
+    validate_shot_name(shot_name)
+    path = _meta_file(shot_name)
+    try:
+        if path.exists():
+            with path.open('r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+    except Exception:
+        pass
+    return {}
+
+
+def save_display_name(shot_name, display_name):
+    """Persist display name for a shot."""
+    validate_shot_name(shot_name)
+    path = _meta_file(shot_name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open('w', encoding='utf-8') as f:
+            json.dump({"display_name": display_name}, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        raise ValueError(f"Failed to save display name: {str(e)}")
 
 from app.config.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
@@ -443,8 +476,10 @@ class ShotManager:
             'caption': captions.get('last_image', ''),
         }
 
+        meta = load_meta(shot_name)
         return {
             'name': shot_name,
+            'display_name': meta.get('display_name', ''),
             'notes': notes,
             'first_image': first_image_dict,
             'last_image': last_image_dict,

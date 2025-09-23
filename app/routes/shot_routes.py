@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, send_file, current_app
+from app.services.shot_manager import get_shot_manager, save_display_name
 from pathlib import Path
 
 from app.services.shot_manager import get_shot_manager
@@ -365,6 +366,35 @@ def archive_shot():
         shot_info = shot_manager.archive_shot(shot_name, bool(archived))
 
         return jsonify({"success": True, "data": shot_info})
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@shot_bp.route("/display-name", methods=["POST"])
+def set_display_name():
+    try:
+        data = request.get_json()
+        shot_name = data.get("shot_name")
+        display_name = data.get("display_name", "")
+
+        if not shot_name:
+            return jsonify({"success": False, "error": "Shot name required"}), 400
+
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+
+        # Validate shot exists
+        shot_manager = get_shot_manager(project["path"])
+        shot_info = shot_manager.get_shot_info(shot_name)  # Will raise if not found
+
+        save_display_name(shot_name, display_name)
+        updated_info = shot_manager.get_shot_info(shot_name)
+
+        return jsonify({"success": True, "data": updated_info})
     except ValueError as e:
         return jsonify({"success": False, "error": str(e)}), 400
     except Exception as e:
