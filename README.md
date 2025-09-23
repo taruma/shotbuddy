@@ -107,6 +107,13 @@ Notes on individual shots can be made easily.
 - Forked from Shotbuddy by Albert Bozesan: https://github.com/albozes/shotbuddy (MIT License).
 - Maintained and extended by Taruma Sakti.
 
+## AI assistance
+This project is maintained by Taruma Sakti and developed with AI assistance:
+- Cline (Plan/Act workflow)
+- Model mix: GPT‑5 and Qwen3 Coder
+
+All AI-assisted changes are reviewed and tested by the maintainer.
+
 ## License
 This project is licensed under the [MIT License](./LICENSE.txt).
 Some third-party assets (e.g., icons) are included under their own licenses, as detailed in the [THIRD_PARTY_LICENSES](./THIRD_PARTY_LICENSES.md) file.

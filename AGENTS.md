@@ -89,4 +89,11 @@ There are currently no automated tests. Running:
 pytest -q
 should complete successfully (0 tests) and verifies the environment is set up. If/when tests are added, place them under tests/ and ensure they are runnable with pytest.
 
+## AI assistance and tooling
+Parts of the codebase were produced with AI assistance:
+- Cline (Plan/Act workflow)
+- Model mix: GPT‑5 and Qwen3 Coder
+
+All AI-assisted changes are reviewed and tested before merging.
+
 This AGENTS.md applies to the entire repository.
