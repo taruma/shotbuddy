@@ -103,6 +103,23 @@ Notes on individual shots can be made easily.
 
 ![Shotbuddy_04](https://github.com/user-attachments/assets/7567416e-3f4b-42d0-888c-b8296b261616)
 
+## New features in this fork
+- Shot reordering to rearrange the sequence (drag-and-drop) (94967e0).
+- Shot archiving to declutter the working grid without deleting assets (4d6e2b7).
+- Table of Shots (TOC) side panel for quick navigation and context (1f96f6b).
+- Action column with icon buttons in the shot grid for common operations (9306c3e).
+- Display name per shot (human‑readable title independent of shot code) (9092027).
+- Asset version promotion and in‑UI cycling through versions (e346fdb).
+- First/last image variants per shot (3610507).
+- Captions for assets (images/videos) stored with shot metadata (8f06ae5).
+- Notes textarea auto‑resize for better editing UX (f15ae81, 5ea73f0).
+- Light theme with toggle; header/menu layout refinements (ca49a7d, 9178fc5).
+- Project‑scoped shot metadata handling for multi‑project support (d8c8c43).
+
+Other improvements:
+- Switched to uv with pyproject.toml for environment/dependency management (ca72d2d, pyproject added).
+- Documentation updates (Gemini guide, contributor guide), footer and attribution cleanups (e0880f6, 02f1460, 0319e56, ee5bbd4, c6229ef).
+
 ## Attribution
 - Forked from Shotbuddy by Albert Bozesan: https://github.com/albozes/shotbuddy (MIT License).
 - Maintained and extended by Taruma Sakti.
