@@ -607,20 +607,28 @@
             const hasFile = maxVersion > 0 || currentVersion > 0;
 
             if (hasFile) {
+                const isVideo = type === 'video';
                 const thumbnailUrl = file.thumbnail ? `${file.thumbnail}?v=${Date.now()}` : null;
-                const thumbnailStyle = thumbnailUrl ?
-                    `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` :
-                    'background: #404040;';
 
-            
+                let mediaHtml;
+                if (isVideo) {
+                    const videoStyle = thumbnailUrl ?
+                        `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` :
+                        'background: #404040;';
+                    mediaHtml = `<div class="preview-thumbnail video-thumbnail" style="${videoStyle}"></div>`;
+                } else {
+                    mediaHtml = thumbnailUrl ?
+                        `<img class="preview-thumbnail" src="${thumbnailUrl}" alt="${displayAssetLabel(type)} thumbnail">` :
+                        `<div class="preview-thumbnail placeholder"></div>`;
+                }
+
                 return `
                     <div class="drop-zone with-caption"
                          ondragover="handleDragOver(event, '${type}')"
                          ondrop="handleDrop(event, '${shot.name}', '${type}')"
                          ondragleave="handleDragLeave(event)">
                         <div class="file-preview">
-                            <div class="preview-thumbnail ${type === 'video' ? 'video-thumbnail' : ''}"
-                                style="${thumbnailStyle}"></div>
+                            ${mediaHtml}
 
                             <div class="version-badge"
                                  title="Click to cycle version"

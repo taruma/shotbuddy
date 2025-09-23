@@ -330,16 +330,23 @@
         }
 
         .preview-thumbnail {
+            display: block;
             width: 100%;
-            aspect-ratio: 4 / 3;
+            height: auto;
             border-radius: 6px;
-            object-fit: cover;
             border: 1px solid #505050;
             background: #404040;
             cursor: default;
         }
 
+        .preview-thumbnail.placeholder {
+            aspect-ratio: 4 / 3;
+        }
+
         .video-thumbnail {
+            aspect-ratio: 4 / 3;
+            background-size: cover;
+            background-position: center;
             position: relative;
             cursor: default;
         }
