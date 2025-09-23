@@ -7,6 +7,11 @@
     <title>Shotbuddy</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
 </head>
 <body>
     <div class="menu-bar">
@@ -45,7 +50,7 @@
                 <div class="header-controls">
                     <button id="theme-toggle" class="dark-button icon-button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">🌙</button>
                     <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder">
-                        <img src="{{ url_for('static', filename='/icons/folder_24.png') }}" alt="Open Project Shots Folder" />
+                        <img src="{{ url_for('static', filename='icons/folder_24.png') }}" alt="Open Project Shots Folder" />
                     </button>
                     <button class="dark-button" onclick="openReorderModal()">Reorder</button>
                     <button class="green-button" onclick="addNewShot()">New Shot +</button>
