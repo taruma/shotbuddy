@@ -171,7 +171,7 @@
         .grid-header {
             background: #2a2a2a;
             display: grid;
-            grid-template-columns: 40px 240px 160px 160px 160px 1fr; /* Actions + existing columns */
+            grid-template-columns: 40px 180px 160px 160px 160px 1fr; /* Actions + existing columns */
             align-items: center; /* Align content to center */
             border-bottom: 1px solid #404040;
         }
@@ -183,11 +183,12 @@
             font-weight: 600;
             font-size: 16px;
             color: #b5b5b5;
+            white-space: normal;
         }
 
 .shot-row {
     display: grid;
-    grid-template-columns: 40px 240px 160px 160px 160px 1fr; /* Actions + existing columns */
+    grid-template-columns: 40px 180px 160px 160px 160px 1fr; /* Actions + existing columns */
     border-bottom: 1px solid #404040;
     align-items: center;
 }
@@ -202,7 +203,7 @@
 }
 
 .shot-name {
-    padding: 20px 16px;
+    padding: 16px;
     font-weight: 500;
     font-size: 16px;
     display: flex;
@@ -210,15 +211,19 @@
     cursor: grab;
     user-select: none;
     color: #e5e5e5;
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .drag-handle-info {
     font-size: 0.8em;
     color: #888;
-    margin-left: 5px;
+    margin-left: 0;
+    margin-top: 4px;
+    display: block;
 }
 
 
