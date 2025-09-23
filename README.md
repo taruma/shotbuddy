@@ -105,51 +105,32 @@ Notes on individual shots can be made easily.
 
 ## New features in this fork
 
-### Reorder shots with drag-and-drop
 Quickly rearrange the sequence directly in the grid. Drag a shot to a new position to reflect the intended order without touching your source assets. The new order is saved with the project so it stays consistent across sessions.
-<!-- Add GIF/picture: reorder-shots.gif -->
+![](/images/demo-sb-reorder-shots.gif)
 
-### Archive shots to declutter the working view
 When a shot is not active but you want to keep all its assets, archive it. Archived shots are hidden from the main grid but remain fully preserved and can be restored at any time.
-<!-- Add GIF/picture: archive-shot.gif -->
+![](/images/demo-sb-archive-shot.gif)
 
-### Table of Shots (TOC) side panel
 Use the TOC panel to scan your project at a glance and jump to any shot instantly. It provides a compact overview, improves navigation for larger projects, and pairs well with reordering and archiving.
-<!-- Add GIF/picture: toc-panel.gif -->
+![](/images/demo-sb-toc-panel.gif)
 
-### Action column with one‑click controls
-Common operations are now one click away via the action column on each row. Open a shot folder, view/edit prompts, archive/unarchive, and access other frequent actions without leaving the grid.
-<!-- Add GIF/picture: action-column.gif -->
-
-### Human‑readable display names
 Give any shot a friendly title separate from its technical code. Display names improve readability in the grid and TOC and make collaboration easier without changing how files are stored.
-<!-- Add GIF/picture: display-name.gif -->
+![](/images/demo-sb-display-name.gif)
 
-### Promote and cycle asset versions
 Choose which version should be treated as the “latest” for downstream tools, and quickly cycle through versions in the UI. This makes auditioning iterations and locking the chosen take fast and traceable.
-<!-- Add GIF/picture: version-promotion.gif -->
+![](/images/demo-sb-version-promotion.gif)
 
-### First/last image variants per shot
 Mark representative “first” and “last” frames to communicate shot intent and transitions. These variants are handy for storyboards, reviews, or cut-in/out references.
-<!-- Add GIF/picture: first-last-variants.gif -->
+![](/images/demo-sb-first-last-variants.gif)
 
-### Captions for images and videos
-Add short captions to assets to capture intent, context, or review notes. Captions are stored with each shot’s metadata and can be surfaced in the UI for quick reference.
-<!-- Add GIF/picture: asset-captions.gif -->
+Add short captions to assets to capture intent, context, or review notes. Captions are stored with each shot’s metadata and can be surfaced in the UI for quick reference. The notes field automatically expands to fit longer comments, so you can write comfortably without manual resizing.
+![](/images/demo-sb-notes-autoresize.gif)
 
-### Notes that grow as you type
-The notes field automatically expands to fit longer comments, so you can write comfortably without manual resizing.
-<!-- Add GIF/picture: notes-autoresize.gif -->
-
-### Light theme and refined layout
 Switch between themes for different environments and preferences. The header and menu layout have been streamlined for clarity and faster navigation.
-<!-- Add GIF/picture: light-theme.gif -->
-
-### Project‑scoped shot metadata
-Shot metadata is now stored and managed at the project level, making multi‑project work more robust while keeping each project’s state self‑contained.
-<!-- Add GIF/picture: project-metadata.gif -->
+![](/images/demo-sb-light-theme.gif)
 
 Other improvements (developer experience & docs)
+- Shot metadata is now stored and managed at the project level, making multi‑project work more robust while keeping each project’s state self‑contained.
 - Uses uv and pyproject.toml for simpler, reproducible environments (uv sync, uv run).
 - Documentation cleanups and footer/attribution updates for clearer guidance.
 
