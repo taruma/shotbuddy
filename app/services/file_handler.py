@@ -10,12 +10,10 @@ from app.services.shot_manager import get_shot_manager
 from app.config.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
     ALLOWED_VIDEO_EXTENSIONS,
-    THUMBNAIL_CACHE_DIR,
     THUMBNAIL_SIZE,
+    get_project_thumbnail_cache_dir,
 )
 
-# Ensure the thumbnail cache directory exists.
-THUMBNAIL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 class FileHandler:
     def __init__(self, project_path):
@@ -28,14 +26,15 @@ class FileHandler:
         self.wip_dir.mkdir(parents=True, exist_ok=True)
         self.latest_images_dir.mkdir(parents=True, exist_ok=True)
         self.latest_videos_dir.mkdir(parents=True, exist_ok=True)
+        self.thumbnail_cache_dir = get_project_thumbnail_cache_dir(self.project_path)
 
     def clear_thumbnail_cache(self):
         """Remove all files from the thumbnail cache."""
-        if not THUMBNAIL_CACHE_DIR.exists():
-            THUMBNAIL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        if not self.thumbnail_cache_dir.exists():
+            self.thumbnail_cache_dir.mkdir(parents=True, exist_ok=True)
             return
 
-        for thumb in THUMBNAIL_CACHE_DIR.iterdir():
+        for thumb in self.thumbnail_cache_dir.iterdir():
             if thumb.is_file():
                 try:
                     thumb.unlink()
@@ -162,7 +161,7 @@ class FileHandler:
             'wip_path': str(wip_path).replace('\\', '/'),
             'final_path': str(final_path).replace('\\', '/'),
             'version': version,
-            'thumbnail': f"static/thumbnails/{Path(thumbnail_path).name}" if thumbnail_path else None
+            'thumbnail': f"/api/shots/thumbnail/{Path(thumbnail_path).name}" if thumbnail_path else None
         }
 
     def get_next_version(self, wip_dir, base_name, file_ext):
@@ -198,7 +197,7 @@ class FileHandler:
                 # Unique thumbnail name
                 image_path = Path(image_path)
                 thumb_filename = f"{shot_name}_{image_path.stem}_thumb.jpg"
-                thumb_path = THUMBNAIL_CACHE_DIR / thumb_filename
+                thumb_path = self.thumbnail_cache_dir / thumb_filename
 
                 if thumb_path.exists():
                     thumb_path.unlink()
@@ -225,14 +224,14 @@ class FileHandler:
 
             video_path = Path(video_path)
             thumb_filename = f"{shot_name}_{video_path.stem}_vthumb.jpg"
-            thumb_path = THUMBNAIL_CACHE_DIR / thumb_filename
+            thumb_path = self.thumbnail_cache_dir / thumb_filename
 
             ffmpeg = _shutil.which("ffmpeg")
             if not ffmpeg:
                 logger.warning("ffmpeg not found; skipping video thumbnail for %s", video_path)
                 return None
 
-            THUMBNAIL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            self.thumbnail_cache_dir.mkdir(parents=True, exist_ok=True)
             tmp_path = thumb_path.with_suffix(".tmp.jpg")
 
             cmd = [ffmpeg, "-y", "-i", str(video_path), "-frames:v", "1", str(tmp_path)]

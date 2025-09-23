@@ -71,8 +71,8 @@ def save_display_name(shot_name, display_name):
 from app.config.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
     ALLOWED_VIDEO_EXTENSIONS,
-    THUMBNAIL_CACHE_DIR,
     THUMBNAIL_SIZE,
+    get_project_thumbnail_cache_dir,
 )
 
 class ShotManager:
@@ -89,6 +89,7 @@ class ShotManager:
         self.wip_dir.mkdir(parents=True, exist_ok=True)
         self.latest_images_dir.mkdir(parents=True, exist_ok=True)
         self.latest_videos_dir.mkdir(parents=True, exist_ok=True)
+        self.thumbnail_cache_dir = get_project_thumbnail_cache_dir(self.project_path)
 
     def _load_archived(self):
         """Load archived shot names from JSON file."""
@@ -200,11 +201,11 @@ class ShotManager:
         if vid_marker.exists():
             vid_marker.rename(self.latest_videos_dir / f"{new_name}.version")
 
-        if THUMBNAIL_CACHE_DIR.exists():
-            for thumb in THUMBNAIL_CACHE_DIR.glob(f"{old_name}_*_thumb.jpg"):
-                thumb.rename(THUMBNAIL_CACHE_DIR / thumb.name.replace(old_name, new_name, 1))
-            for vthumb in THUMBNAIL_CACHE_DIR.glob(f"{old_name}_*_vthumb.jpg"):
-                vthumb.rename(THUMBNAIL_CACHE_DIR / vthumb.name.replace(old_name, new_name, 1))
+        if self.thumbnail_cache_dir.exists():
+            for thumb in self.thumbnail_cache_dir.glob(f"{old_name}_*_thumb.jpg"):
+                thumb.rename(self.thumbnail_cache_dir / thumb.name.replace(old_name, new_name, 1))
+            for vthumb in self.thumbnail_cache_dir.glob(f"{old_name}_*_vthumb.jpg"):
+                vthumb.rename(self.thumbnail_cache_dir / vthumb.name.replace(old_name, new_name, 1))
 
         # Preserve archived state across rename
         try:
@@ -661,7 +662,7 @@ class ShotManager:
             try:
                 final_stem = Path(final_path).stem
                 thumb_filename = f"{shot_name}_{final_stem}_thumb.jpg"
-                old_thumb = THUMBNAIL_CACHE_DIR / thumb_filename
+                old_thumb = self.thumbnail_cache_dir / thumb_filename
                 if old_thumb.exists():
                     old_thumb.unlink()
             except Exception:
@@ -700,7 +701,7 @@ class ShotManager:
         try:
             final_stem = Path(final_path).stem
             thumb_filename = f"{shot_name}_{final_stem}_vthumb.jpg"
-            old_thumb = THUMBNAIL_CACHE_DIR / thumb_filename
+            old_thumb = self.thumbnail_cache_dir / thumb_filename
             if old_thumb.exists():
                 old_thumb.unlink()
         except Exception:
@@ -857,25 +858,29 @@ class ShotManager:
 
         image_path = Path(image_path)
         thumb_filename = f"{shot_name}_{image_path.stem}_thumb.jpg"
-        thumb_path = THUMBNAIL_CACHE_DIR / thumb_filename
+        thumb_path = self.thumbnail_cache_dir / thumb_filename
 
-        if not thumb_path.exists():
-            try:
-                THUMBNAIL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-                with Image.open(image_path) as img:
-                    img.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
-                    if img.mode in ("RGBA", "LA", "P"):
-                        background = Image.new("RGB", img.size, (64, 64, 64))
-                        if img.mode == "P":
-                            img = img.convert("RGBA")
-                        background.paste(img, mask=img.split()[-1] if "A" in img.mode else None)
-                        img = background
-                    img.save(str(thumb_path), "JPEG", quality=85)
-            except Exception as e:
-                logger.warning("Error creating thumbnail: %s", e)
-                return None
+        try:
+            if thumb_path.exists() and thumb_path.stat().st_mtime >= image_path.stat().st_mtime:
+                return f"/api/shots/thumbnail/{thumb_filename}"
+        except Exception:
+            pass
+        try:
+            self.thumbnail_cache_dir.mkdir(parents=True, exist_ok=True)
+            with Image.open(image_path) as img:
+                img.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
+                if img.mode in ("RGBA", "LA", "P"):
+                    background = Image.new("RGB", img.size, (64, 64, 64))
+                    if img.mode == "P":
+                        img = img.convert("RGBA")
+                    background.paste(img, mask=img.split()[-1] if "A" in img.mode else None)
+                    img = background
+                img.save(str(thumb_path), "JPEG", quality=85)
+        except Exception as e:
+            logger.warning("Error creating thumbnail: %s", e)
+            return None
 
-        return f"/static/thumbnails/{thumb_filename}"
+        return f"/api/shots/thumbnail/{thumb_filename}"
 
     def get_video_thumbnail_path(self, video_path, shot_name):
         """Return (and create if necessary) the thumbnail for a video."""
@@ -887,15 +892,17 @@ class ShotManager:
 
         video_path = Path(video_path)
         thumb_filename = f"{shot_name}_{video_path.stem}_vthumb.jpg"
-        thumb_path = THUMBNAIL_CACHE_DIR / thumb_filename
+        thumb_path = self.thumbnail_cache_dir / thumb_filename
 
+        if thumb_path.exists() and thumb_path.stat().st_mtime >= video_path.stat().st_mtime:
+            return f"/api/shots/thumbnail/{thumb_filename}"
         if not thumb_path.exists():
             ffmpeg = _shutil.which("ffmpeg")
             if not ffmpeg:
                 logger.warning("ffmpeg not found; skipping video thumbnail for %s", video_path)
                 return None
             try:
-                THUMBNAIL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+                self.thumbnail_cache_dir.mkdir(parents=True, exist_ok=True)
                 tmp_path = thumb_path.with_suffix(".tmp.jpg")
                 cmd = [ffmpeg, "-y", "-i", str(video_path), "-frames:v", "1", str(tmp_path)]
                 subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -913,7 +920,7 @@ class ShotManager:
                 logger.warning("Error creating video thumbnail: %s", e)
                 return None
 
-        return f"/static/thumbnails/{thumb_filename}"
+        return f"/api/shots/thumbnail/{thumb_filename}"
 
 def get_shot_manager(project_path, cache=None):
     """Retrieve a cached ``ShotManager`` for the given path."""

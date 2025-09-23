@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, send_file, current_app
 from app.services.shot_manager import get_shot_manager
 from pathlib import Path
+from app.config.constants import get_project_thumbnail_cache_dir
+from datetime import datetime
 
 from app.services.file_handler import FileHandler
 
@@ -247,19 +249,29 @@ def create_shot_between():
 
 @shot_bp.route("/thumbnail/<path:filepath>")
 def serve_thumbnail(filepath):
-    """Serve a thumbnail from the cache directory."""
+    """Serve a thumbnail from the current project's cache directory."""
     try:
-        from app.config.constants import THUMBNAIL_CACHE_DIR
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return "No current project", 400
 
-        thumb_path = THUMBNAIL_CACHE_DIR / Path(filepath).name
-        thumb_dir = THUMBNAIL_CACHE_DIR.resolve()
-        thumb_path = thumb_path.resolve()
+        thumb_dir = get_project_thumbnail_cache_dir(project["path"]).resolve()
+        thumb_path = (thumb_dir / Path(filepath).name).resolve()
 
         if not str(thumb_path).startswith(str(thumb_dir)):
             return "Invalid path", 400
 
         if thumb_path.is_file():
-            return send_file(str(thumb_path))
+            resp = send_file(str(thumb_path))
+            # Add strong caching headers
+            mtime = thumb_path.stat().st_mtime
+            resp.last_modified = datetime.fromtimestamp(mtime)
+            resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            # Support conditional requests
+            resp.add_etag()
+            resp.make_conditional(request)
+            return resp
         return "File not found", 404
     except Exception as e:
         return str(e), 500

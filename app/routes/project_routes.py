@@ -6,7 +6,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from app.services.shot_manager import get_shot_manager, clear_shot_manager_cache
-from app.services.file_handler import FileHandler
 
 project_bp = Blueprint('project', __name__)
 
@@ -27,8 +26,6 @@ def get_current_project():
 
             if (not last_scanned or
                     folder_mtime > datetime.fromisoformat(last_scanned).timestamp()):
-                file_handler = FileHandler(path_str)
-                file_handler.clear_thumbnail_cache()
                 clear_shot_manager_cache()
                 get_shot_manager(path_str).get_shots()
                 project_manager.projects.setdefault("last_scanned", {})[path_str] = (
@@ -103,8 +100,6 @@ def open_project():
         folder_mtime = project_path.stat().st_mtime
         if (not last_scanned or
                 folder_mtime > datetime.fromisoformat(last_scanned).timestamp()):
-            file_handler = FileHandler(path_str)
-            file_handler.clear_thumbnail_cache()
             clear_shot_manager_cache()
             shot_manager = get_shot_manager(path_str)
             shot_manager.get_shots()
