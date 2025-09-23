@@ -104,21 +104,54 @@ Notes on individual shots can be made easily.
 ![Shotbuddy_04](https://github.com/user-attachments/assets/7567416e-3f4b-42d0-888c-b8296b261616)
 
 ## New features in this fork
-- Shot reordering to rearrange the sequence (drag-and-drop) (94967e0).
-- Shot archiving to declutter the working grid without deleting assets (4d6e2b7).
-- Table of Shots (TOC) side panel for quick navigation and context (1f96f6b).
-- Action column with icon buttons in the shot grid for common operations (9306c3e).
-- Display name per shot (human‑readable title independent of shot code) (9092027).
-- Asset version promotion and in‑UI cycling through versions (e346fdb).
-- First/last image variants per shot (3610507).
-- Captions for assets (images/videos) stored with shot metadata (8f06ae5).
-- Notes textarea auto‑resize for better editing UX (f15ae81, 5ea73f0).
-- Light theme with toggle; header/menu layout refinements (ca49a7d, 9178fc5).
-- Project‑scoped shot metadata handling for multi‑project support (d8c8c43).
 
-Other improvements:
-- Switched to uv with pyproject.toml for environment/dependency management (ca72d2d, pyproject added).
-- Documentation updates (Gemini guide, contributor guide), footer and attribution cleanups (e0880f6, 02f1460, 0319e56, ee5bbd4, c6229ef).
+### Reorder shots with drag-and-drop
+Quickly rearrange the sequence directly in the grid. Drag a shot to a new position to reflect the intended order without touching your source assets. The new order is saved with the project so it stays consistent across sessions.
+<!-- Add GIF/picture: reorder-shots.gif -->
+
+### Archive shots to declutter the working view
+When a shot is not active but you want to keep all its assets, archive it. Archived shots are hidden from the main grid but remain fully preserved and can be restored at any time.
+<!-- Add GIF/picture: archive-shot.gif -->
+
+### Table of Shots (TOC) side panel
+Use the TOC panel to scan your project at a glance and jump to any shot instantly. It provides a compact overview, improves navigation for larger projects, and pairs well with reordering and archiving.
+<!-- Add GIF/picture: toc-panel.gif -->
+
+### Action column with one‑click controls
+Common operations are now one click away via the action column on each row. Open a shot folder, view/edit prompts, archive/unarchive, and access other frequent actions without leaving the grid.
+<!-- Add GIF/picture: action-column.gif -->
+
+### Human‑readable display names
+Give any shot a friendly title separate from its technical code. Display names improve readability in the grid and TOC and make collaboration easier without changing how files are stored.
+<!-- Add GIF/picture: display-name.gif -->
+
+### Promote and cycle asset versions
+Choose which version should be treated as the “latest” for downstream tools, and quickly cycle through versions in the UI. This makes auditioning iterations and locking the chosen take fast and traceable.
+<!-- Add GIF/picture: version-promotion.gif -->
+
+### First/last image variants per shot
+Mark representative “first” and “last” frames to communicate shot intent and transitions. These variants are handy for storyboards, reviews, or cut-in/out references.
+<!-- Add GIF/picture: first-last-variants.gif -->
+
+### Captions for images and videos
+Add short captions to assets to capture intent, context, or review notes. Captions are stored with each shot’s metadata and can be surfaced in the UI for quick reference.
+<!-- Add GIF/picture: asset-captions.gif -->
+
+### Notes that grow as you type
+The notes field automatically expands to fit longer comments, so you can write comfortably without manual resizing.
+<!-- Add GIF/picture: notes-autoresize.gif -->
+
+### Light theme and refined layout
+Switch between themes for different environments and preferences. The header and menu layout have been streamlined for clarity and faster navigation.
+<!-- Add GIF/picture: light-theme.gif -->
+
+### Project‑scoped shot metadata
+Shot metadata is now stored and managed at the project level, making multi‑project work more robust while keeping each project’s state self‑contained.
+<!-- Add GIF/picture: project-metadata.gif -->
+
+Other improvements (developer experience & docs)
+- Uses uv and pyproject.toml for simpler, reproducible environments (uv sync, uv run).
+- Documentation cleanups and footer/attribution updates for clearer guidance.
 
 ## Attribution
 - Forked from Shotbuddy by Albert Bozesan: https://github.com/albozes/shotbuddy (MIT License).
