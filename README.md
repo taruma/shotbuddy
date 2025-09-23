@@ -106,28 +106,28 @@ Notes on individual shots can be made easily.
 ## New features in this fork
 
 Quickly rearrange the sequence directly in the grid. Drag a shot to a new position to reflect the intended order without touching your source assets. The new order is saved with the project so it stays consistent across sessions.
-![](/images/demo-sb-reorder-shots.gif)
+![](https://github.com/user-attachments/assets/54f8adad-a111-4189-a390-426fb770943a)
 
 When a shot is not active but you want to keep all its assets, archive it. Archived shots are hidden from the main grid but remain fully preserved and can be restored at any time.
-![](/images/demo-sb-archive-shot.gif)
+![](https://github.com/user-attachments/assets/8c1172ea-a78b-4020-90df-e8234ab3d6c4)
 
 Use the TOC panel to scan your project at a glance and jump to any shot instantly. It provides a compact overview, improves navigation for larger projects, and pairs well with reordering and archiving.
-![](/images/demo-sb-toc-panel.gif)
+![](https://github.com/user-attachments/assets/c61cf6d3-c1c6-4f4a-ac97-d6c69afcf233)
 
 Give any shot a friendly title separate from its technical code. Display names improve readability in the grid and TOC and make collaboration easier without changing how files are stored.
-![](/images/demo-sb-display-name.gif)
+![](https://github.com/user-attachments/assets/91683e86-46b5-4541-bcd0-2c98a17aa86f)
 
 Choose which version should be treated as the “latest” for downstream tools, and quickly cycle through versions in the UI. This makes auditioning iterations and locking the chosen take fast and traceable.
-![](/images/demo-sb-version-promotion.gif)
+![](https://github.com/user-attachments/assets/82471148-69ba-449f-8a06-ac9e1165820c)
 
 Mark representative “first” and “last” frames to communicate shot intent and transitions. These variants are handy for storyboards, reviews, or cut-in/out references.
-![](/images/demo-sb-first-last-variants.gif)
+![](https://github.com/user-attachments/assets/b25e1f6a-b3f4-4463-82ae-095b4aab172b)
 
 Add short captions to assets to capture intent, context, or review notes. Captions are stored with each shot’s metadata and can be surfaced in the UI for quick reference. The notes field automatically expands to fit longer comments, so you can write comfortably without manual resizing.
-![](/images/demo-sb-notes-autoresize.gif)
+![](https://github.com/user-attachments/assets/c8b89756-fa3f-4394-b7fa-e843df87d1ae)
 
 Switch between themes for different environments and preferences. The header and menu layout have been streamlined for clarity and faster navigation.
-![](/images/demo-sb-light-theme.gif)
+![](https://github.com/user-attachments/assets/b7c44d15-0d0c-4c6d-8b6a-a659335d4f6b)
 
 Other improvements (developer experience & docs)
 - Shot metadata is now stored and managed at the project level, making multi‑project work more robust while keeping each project’s state self‑contained.
