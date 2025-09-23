@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify, send_file, current_app
-from app.services.shot_manager import get_shot_manager, save_display_name
+from app.services.shot_manager import get_shot_manager
 from pathlib import Path
 
-from app.services.shot_manager import get_shot_manager
 from app.services.file_handler import FileHandler
 
 import subprocess
@@ -391,7 +390,7 @@ def set_display_name():
         shot_manager = get_shot_manager(project["path"])
         shot_info = shot_manager.get_shot_info(shot_name)  # Will raise if not found
 
-        save_display_name(shot_name, display_name)
+        shot_manager.save_display_name(shot_name, display_name)
         updated_info = shot_manager.get_shot_info(shot_name)
 
         return jsonify({"success": True, "data": updated_info})

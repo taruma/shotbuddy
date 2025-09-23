@@ -37,6 +37,11 @@ def _meta_file(shot_name):
     return Path("shots") / "wip" / shot_name / "meta.json"
 
 
+def _project_meta_file(project_path, shot_name):
+    """Return path to the project-scoped meta JSON for a shot."""
+    return Path(project_path) / "shots" / "wip" / shot_name / "meta.json"
+
+
 def load_meta(shot_name):
     """Load meta dict for a shot."""
     validate_shot_name(shot_name)
@@ -367,6 +372,37 @@ class ShotManager:
 
         return f"{base_shot}_{next_num:03d}"
 
+    def load_meta(self, shot_name):
+        """Load meta dict for a shot from project path, with fallback to app-level."""
+        validate_shot_name(shot_name)
+        project_path = getattr(self, 'project_path', None)
+        if project_path:
+            path = _project_meta_file(project_path, shot_name)
+            try:
+                if path.exists():
+                    with path.open('r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        if isinstance(data, dict):
+                            return data
+            except Exception:
+                pass
+        # Fallback to app-level meta (for legacy data)
+        return load_meta(shot_name)
+
+    def save_display_name(self, shot_name, display_name):
+        """Persist display name for a shot in project path."""
+        validate_shot_name(shot_name)
+        project_path = getattr(self, 'project_path', None)
+        if not project_path:
+            raise ValueError("Project path not set")
+        path = _project_meta_file(project_path, shot_name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with path.open('w', encoding='utf-8') as f:
+                json.dump({"display_name": display_name}, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            raise ValueError(f"Failed to save display name: {str(e)}")
+
     def get_shot_info(self, shot_name):
         """Get information about a specific shot."""
         validate_shot_name(shot_name)
@@ -476,7 +512,7 @@ class ShotManager:
             'caption': captions.get('last_image', ''),
         }
 
-        meta = load_meta(shot_name)
+        meta = self.load_meta(shot_name)
         return {
             'name': shot_name,
             'display_name': meta.get('display_name', ''),

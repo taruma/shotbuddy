@@ -196,6 +196,12 @@ body.light {
     margin-top: 2px;
 }
 
+.shot-name {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 /* Table of Shots Panel */
 .shot-toc {
     position: fixed;
