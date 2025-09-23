@@ -5,6 +5,20 @@
         const NEW_SHOT_DROP_TEXT = 'Drop an asset here to create a new shot.';
         document.documentElement.style.setProperty('--new-shot-drop-text', `'${NEW_SHOT_DROP_TEXT}'`);
 
+        // Auto-resize notes textareas to fit content (no scrollbars)
+        function autoResize(textarea) {
+            if (!textarea) return;
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        // Wire auto-resize to all current and future .notes-input elements
+        document.addEventListener('input', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('notes-input')) {
+                autoResize(e.target);
+            }
+        });
+
         // Theme functions
         function applyTheme(theme) {
             document.body.classList.toggle('light', theme === 'light');
@@ -287,9 +301,11 @@
                     archivedContainer.appendChild(row);
                 });
 
-                shotList.appendChild(archivedContainer);
+            shotList.appendChild(archivedContainer);
             }
 
+            // Initialize auto-resize for all existing .notes-input elements
+            document.querySelectorAll('.notes-input').forEach(autoResize);
             restoreScroll();
             initSortable();
         }

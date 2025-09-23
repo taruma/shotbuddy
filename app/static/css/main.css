@@ -529,9 +529,10 @@
         }
 
         .notes-input {
-            height: 100%;
-            min-height: 100px; /* Or remove min-height if undesired */
+            height: auto;
+            min-height: 100px;
             max-height: none;
+            overflow-y: hidden;
             width: 100%;
             background: #2a2a2a;
             border: 1px solid #404040;
@@ -541,8 +542,6 @@
             font-family: inherit;
             font-size: 14px;
             resize: none;
-            min-height: 36px;
-            max-height: 120px;
             transition: border-color 0.2s, background 0.2s;
         }
 
