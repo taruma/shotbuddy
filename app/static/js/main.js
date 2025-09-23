@@ -255,19 +255,31 @@
         }
 
         async function checkForProject() {
-            try {
-                const response = await fetch('/api/project/current');
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    currentProject = result.data;
-                    showMainInterface();
-                    loadShots();
-                } else {
+            // Check if we're already in a project (e.g., after refresh)
+            const isInProject = sessionStorage.getItem('inProject') === 'true';
+            
+            if (isInProject) {
+                // We're already in a project, so just reload the shots
+                // But first we need to get the current project data
+                try {
+                    const response = await fetch('/api/project/current');
+                    const result = await response.json();
+                    
+                    if (result.success && result.data) {
+                        currentProject = result.data;
+                        showMainInterface();
+                        loadShots();
+                    } else {
+                        showSetupScreen();
+                        sessionStorage.removeItem('inProject');
+                    }
+                } catch (error) {
+                    console.error('Error checking project:', error);
                     showSetupScreen();
+                    sessionStorage.removeItem('inProject');
                 }
-            } catch (error) {
-                console.error('Error checking project:', error);
+            } else {
+                // On first load, don't auto-load recent project - show setup screen
                 showSetupScreen();
             }
         }
@@ -276,6 +288,8 @@
             document.getElementById('setup-screen').style.display = 'flex';
             document.getElementById('main-interface').style.display = 'none';
             loadRecentProjects();
+            // Clear flag to indicate we're not in a project
+            sessionStorage.removeItem('inProject');
         }
 
         async function loadRecentProjects() {
@@ -319,6 +333,8 @@
             if (input && currentProject && currentProject.path) {
                 input.value = currentProject.path;
             }
+            // Set flag to indicate we're in a project
+            sessionStorage.setItem('inProject', 'true');
         }
 
         async function loadShots(rowId = null) {
