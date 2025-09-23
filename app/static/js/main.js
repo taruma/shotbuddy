@@ -1287,3 +1287,125 @@ async function openShotsFolder() {
         showNotification('Failed to open folder', 'error');
     }
 }
+
+// Reorder Modal Functions
+let reorderSortable = null;
+
+function openReorderModal() {
+    const modal = document.getElementById('reorder-modal');
+    const list = document.getElementById('reorder-list');
+    const filter = document.getElementById('reorder-filter');
+    
+    if (!modal || !list) return;
+    
+    // Clear previous content
+    list.innerHTML = '';
+    filter.value = '';
+    
+    // Get active shots
+    const activeShots = shots.filter(s => !s.archived);
+    
+    if (activeShots.length === 0) {
+        list.innerHTML = '<li class="reorder-item empty">No active shots to reorder</li>';
+    } else {
+        // Create list items
+        activeShots.forEach((shot, index) => {
+            const item = document.createElement('li');
+            item.className = 'reorder-item';
+            item.dataset.name = shot.name;
+            item.innerHTML = `
+                <span class="badge">${index + 1}</span>
+                ${shot.display_name ? `${escapeHtml(shot.display_name)} <span class="shot-code">(${shot.name})</span>` : shot.name}
+            `;
+            list.appendChild(item);
+        });
+        
+        // Initialize Sortable
+        if (reorderSortable) {
+            reorderSortable.destroy();
+        }
+        reorderSortable = new Sortable(list, {
+            animation: 150,
+            ghostClass: 'reorder-ghost',
+            chosenClass: 'reorder-chosen',
+            dragClass: 'reorder-drag'
+        });
+    }
+    
+    // Show modal
+    modal.style.display = 'flex';
+}
+
+function closeReorderModal() {
+    const modal = document.getElementById('reorder-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function saveReorder() {
+    const list = document.getElementById('reorder-list');
+    if (!list) return;
+    
+    const items = Array.from(list.querySelectorAll('.reorder-item:not(.empty)'));
+    if (items.length === 0) {
+        closeReorderModal();
+        return;
+    }
+    
+    const activeOrdered = items.map(item => item.dataset.name);
+    const archived = shots.filter(s => s.archived).map(s => s.name);
+    const shot_order = activeOrdered.concat(archived);
+    
+    try {
+        const response = await fetch('/api/shots/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ shot_order: shot_order })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Update local shots array to match new order
+            shots.sort((a, b) => shot_order.indexOf(a.name) - shot_order.indexOf(b.name));
+            renderShots();
+            closeReorderModal();
+            showNotification('Shot order saved');
+        } else {
+            showNotification(result.error || 'Failed to save order', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving shot order:', error);
+        showNotification('Error saving shot order', 'error');
+    }
+}
+
+// Filter functionality for reorder modal
+document.addEventListener('DOMContentLoaded', function() {
+    const filter = document.getElementById('reorder-filter');
+    if (filter) {
+        filter.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const items = document.querySelectorAll('#reorder-list .reorder-item:not(.empty)');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        });
+    }
+    
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('reorder-modal');
+        if (modal && event.target === modal) {
+            closeReorderModal();
+        }
+    });
+});
+
+// Expose functions globally
+window.openReorderModal = openReorderModal;
+window.closeReorderModal = closeReorderModal;
+window.saveReorder = saveReorder;

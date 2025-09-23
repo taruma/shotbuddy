@@ -47,6 +47,7 @@
                     <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder">
                         <img src="{{ url_for('static', filename='/icons/folder_24.png') }}" alt="Open Project Shots Folder" />
                     </button>
+                    <button class="dark-button" onclick="openReorderModal()">Reorder</button>
                     <button class="green-button" onclick="addNewShot()">New Shot +</button>
                 </div>
             </div>
@@ -102,6 +103,19 @@
                 <div class="modal-buttons">
                     <button class="dark-button" onclick="savePrompt()">Save &amp; Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reorder Modal -->
+    <div id="reorder-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px;">Reorder Shots</h3>
+            <input id="reorder-filter" type="text" class="toc-filter" placeholder="Filter shots...">
+            <ul id="reorder-list" class="compact-list"></ul>
+            <div class="modal-buttons">
+                <button class="dark-button" onclick="saveReorder()">Save</button>
+                <button class="dark-button" onclick="closeReorderModal()">Cancel</button>
             </div>
         </div>
     </div>

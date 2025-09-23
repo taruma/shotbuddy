@@ -781,3 +781,134 @@
             border-color: #00c851;
             background: #333333;
         }
+
+        /* Reorder Modal Styles */
+        .compact-list {
+            list-style: none;
+            margin: 15px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            background: #2a2a2a;
+        }
+
+        .reorder-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #404040;
+            cursor: grab;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .reorder-item:last-child {
+            border-bottom: none;
+        }
+
+        .reorder-item:hover {
+            background: #333333;
+        }
+
+        .reorder-item.empty {
+            cursor: default;
+            color: #808080;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .reorder-item.empty:hover {
+            background: transparent;
+        }
+
+        .reorder-item .badge {
+            background: #00c851;
+            color: #1a1a1a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 12px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .reorder-item .shot-code {
+            color: #808080;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        /* Sortable drag states */
+        .reorder-ghost {
+            opacity: 0.4;
+            background: #00c851;
+        }
+
+        .reorder-chosen {
+            transform: rotate(5deg);
+        }
+
+        .reorder-drag {
+            background: #333333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* TOC filter styling for reorder modal */
+        .toc-filter {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #eee;
+            font-size: 14px;
+        }
+
+        .toc-filter:focus {
+            outline: none;
+            border-color: #00c851;
+            background: #333333;
+        }
+
+        /* Larger and more compact Reorder Modal */
+        #reorder-modal .modal-content {
+            width: 800px;
+            max-width: 95vw;
+            text-align: left;
+        }
+
+        #reorder-modal h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        #reorder-modal .toc-filter {
+            font-size: 12px;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+        }
+
+        .compact-list {
+            max-height: 70vh;
+        }
+
+        .reorder-item {
+            font-size: 13px;
+            padding: 8px 12px;
+            line-height: 1.25;
+        }
+
+        .reorder-item .badge {
+            font-size: 11px;
+            padding: 3px 6px;
+            min-width: 24px;
+            margin-right: 10px;
+        }
+
+        .reorder-item .shot-code {
+            font-size: 11px;
+            margin-left: 6px;
+        }
