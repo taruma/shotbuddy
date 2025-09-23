@@ -221,9 +221,7 @@
     margin-left: 5px;
 }
 
-.action-header {
-    /* empty header cell, width controlled by grid-template-columns */
-}
+
 
 .action-cell {
     display: flex;
