@@ -312,8 +312,13 @@
                                 <div class="recent-project-name">${escapeHtml(project.name)}</div>
                                 <div class="recent-project-path">${escapeHtml(project.path)}</div>
                             </div>
-                            <button class="dark-button" onclick="openRecentProject('${escapeHtml(project.path)}')">Open</button>
+                            <button class="dark-button" data-project-path="${project.path}">Open</button>
                         `;
+                        // Add event listener to the button to avoid escaping issues with onclick attribute
+                        const openButton = projectItem.querySelector('button');
+                        openButton.addEventListener('click', function() {
+                            openRecentProject(this.getAttribute('data-project-path'));
+                        });
                         recentList.appendChild(projectItem);
                     });
                 } else {
