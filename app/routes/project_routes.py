@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, render_template, current_app
 from pathlib import Path
 from datetime import datetime
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -152,3 +153,46 @@ def create_project():
         return jsonify({"success": True, "data": project_info})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@project_bp.route("/api/system/browse-folder")
+def browse_folder():
+    """Open a native folder picker dialog and return the selected path"""
+    try:
+        # Try to use tkinter for native folder dialog first
+        try:
+            from tkinter import Tk
+            from tkinter import filedialog
+            
+            # Create and hide the root window
+            root = Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)  # Bring dialog to front
+            
+            # Open folder dialog
+            folder_path = filedialog.askdirectory(title="Select Project Folder")
+            root.destroy()
+            
+            if not folder_path:
+                return jsonify({"success": False, "error": "No folder selected"}), 400
+                
+            return jsonify({"success": True, "data": {"path": folder_path}})
+            
+        except ImportError:
+            logger.info("Tkinter not available, trying alternative methods")
+        except Exception as e:
+            logger.warning("Tkinter failed: %s", e)
+        
+        # Fallback: Return the user's home directory as a starting point
+        # This allows the UI to show a sensible default and let the user manually edit the path
+        import os
+        home_dir = os.path.expanduser("~")
+        return jsonify({
+            "success": True, 
+            "data": {"path": home_dir},
+            "warning": "Native folder dialog not available. Please manually edit the path or use the manual input fallback."
+        })
+        
+    except Exception as e:
+        logger.error("Error in browse_folder: %s", e)
+        return jsonify({"success": False, "error": f"Failed to open folder dialog: {str(e)}"}), 500

@@ -18,6 +18,11 @@ shots/
 
 The application automatically manages the latest versions in `latest_images` and `latest_videos` while keeping all historical versions inside the `wip` shot folders.
 
+## Requirements
+
+- **Python**: >= 3.13.1
+  This project requires Python 3.13.1 or newer. pip and uv enforce this when installing; attempting to install with an older interpreter will fail with a message referencing the package's requires-python metadata.
+
 ## Installation
 
 Using uv

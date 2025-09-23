@@ -17,18 +17,31 @@
     <div class="menu-bar">
         <div class="container">
             <div class="setup-panel">
-                <input
-                    id="manual-path-input"
-                    class="path-input"
-                    type="text"
-                    placeholder="Enter full path to project folder"
-                />
-                <button class="dark-button" onclick="loadProjectFromManualPath()">
-                    Load Project from Path
+                <button class="green-button" onclick="openProjectDialog()">
+                    Open Project...
                 </button>
                 <button class="dark-button" onclick="openCreateProjectModal()">
-                    Create New Project at Path
+                    New Project...
                 </button>
+                <div class="manual-path-fallback" style="margin-top: 10px; display: none;" id="manual-path-fallback">
+                    <input
+                        id="manual-path-input"
+                        class="path-input"
+                        type="text"
+                        placeholder="Enter full path to project folder"
+                    />
+                    <button class="dark-button" onclick="loadProjectFromManualPath()">
+                        Load from Path
+                    </button>
+                    <button class="dark-button" onclick="toggleManualPath()" style="margin-left: 5px;">
+                        Hide
+                    </button>
+                </div>
+                <div style="margin-top: 5px;">
+                    <a href="#" onclick="toggleManualPath(); return false;" style="color: #888; font-size: 12px; text-decoration: none;">
+                        Manual path input...
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -38,7 +51,20 @@
         <div class="setup-card">
             <h2 style="margin-bottom: 20px;">Shotbuddy</h2>
             <p style="margin-bottom: 30px; color: #b5b5b5;">No project is currently open.</p>
-            <p style="margin-bottom: 20px; color: #808080; font-size: 14px;">Use the menu above to create a new project or open an existing one.</p>
+            
+            <div class="setup-actions" style="margin-bottom: 30px;">
+                <button class="green-button large-button" onclick="openProjectDialog()" style="margin-right: 15px;">
+                    Open Project...
+                </button>
+                <button class="dark-button large-button" onclick="openCreateProjectModal()">
+                    New Project...
+                </button>
+            </div>
+            
+            <div id="recent-projects-section" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #b5b5b5;">Recent Projects</h3>
+                <div id="recent-projects-list" class="recent-projects-list"></div>
+            </div>
         </div>
     </div>
 
@@ -81,7 +107,17 @@
     <div id="create-project-modal" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 10px;">Create New Project</h3>
-            <input id="new-project-name" type="text" placeholder="Project Name" />
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Project Name</label>
+                <input id="new-project-name" type="text" placeholder="Enter project name" style="width: 100%;" />
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Location</label>
+                <div style="display: flex; gap: 10px;">
+                    <input id="new-project-location" type="text" placeholder="Select a folder..." readonly style="flex: 1;" />
+                    <button class="dark-button" onclick="browseProjectLocation()">Browse...</button>
+                </div>
+            </div>
             <div class="modal-buttons">
                 <button class="dark-button" onclick="confirmCreateProject()">Create</button>
                 <button class="dark-button" onclick="closeCreateProjectModal()">Cancel</button>

@@ -12,7 +12,7 @@ authors = [
   { name = "Taruma Sakti" },
   { name = "Albert Bozesan" }
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.13.1"
 dependencies = [
   "flask",
   "flask-cors",

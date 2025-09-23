@@ -37,6 +37,80 @@
 
         // Menu functions
 
+        async function browseFolder() {
+            try {
+                const response = await fetch('/api/system/browse-folder');
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.warning) {
+                        showNotification(result.warning, 'error');
+                        // Show manual path fallback when native dialog isn't available
+                        toggleManualPath();
+                    }
+                    return result.data.path;
+                } else {
+                    showNotification(result.error || 'Failed to open folder dialog', 'error');
+                    return null;
+                }
+            } catch (error) {
+                console.error("Error browsing folder:", error);
+                showNotification("Failed to open folder dialog", "error");
+                return null;
+            }
+        }
+
+        async function openProjectDialog() {
+            const folderPath = await browseFolder();
+            if (!folderPath) return;
+            
+            try {
+                const response = await fetch('/api/project/open', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: folderPath })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentProject = result.data;
+                    showMainInterface();
+                    loadShots();
+                    showNotification(`Opened project "${result.data.name}"`);
+                } else {
+                    showNotification(result.error || 'Failed to open project', 'error');
+                }
+            } catch (error) {
+                console.error("Error loading project:", error);
+                showNotification("Unexpected error loading project", "error");
+            }
+        }
+
+        async function openRecentProject(projectPath) {
+            try {
+                const response = await fetch('/api/project/open', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: projectPath })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentProject = result.data;
+                    showMainInterface();
+                    loadShots();
+                    showNotification(`Opened project "${result.data.name}"`);
+                } else {
+                    showNotification(result.error || 'Failed to open project', 'error');
+                }
+            } catch (error) {
+                console.error("Error loading project:", error);
+                showNotification("Unexpected error loading project", "error");
+            }
+        }
+
         async function loadProjectFromManualPath() {
             const input = document.getElementById('manual-path-input');
             const path = input.value.trim();
@@ -69,13 +143,25 @@
             }
         }
 
-        function openCreateProjectModal() {
-            const basePath = document.getElementById('manual-path-input').value.trim();
-            if (!basePath) {
-                showNotification("Please enter a full path to a project folder.", "error");
-                return;
+        function toggleManualPath() {
+            const fallback = document.getElementById('manual-path-fallback');
+            if (fallback.style.display === 'none') {
+                fallback.style.display = 'block';
+            } else {
+                fallback.style.display = 'none';
             }
+        }
+
+        async function browseProjectLocation() {
+            const folderPath = await browseFolder();
+            if (folderPath) {
+                document.getElementById('new-project-location').value = folderPath;
+            }
+        }
+
+        function openCreateProjectModal() {
             document.getElementById('new-project-name').value = '';
+            document.getElementById('new-project-location').value = '';
             document.getElementById('create-project-modal').style.display = 'flex';
             document.getElementById('new-project-name').focus();
         }
@@ -85,11 +171,11 @@
         }
 
         async function confirmCreateProject() {
-            const basePath = document.getElementById('manual-path-input').value.trim();
+            const locationPath = document.getElementById('new-project-location').value.trim();
             const projectName = document.getElementById('new-project-name').value.trim();
 
-            if (!basePath) {
-                showNotification("Please enter a full path to a project folder.", "error");
+            if (!locationPath) {
+                showNotification("Please select a location for the project.", "error");
                 return;
             }
             if (!projectName) {
@@ -101,7 +187,7 @@
                 const response = await fetch('/api/project/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path: basePath, name: projectName })
+                    body: JSON.stringify({ path: locationPath, name: projectName })
                 });
 
                 const result = await response.json();
@@ -183,6 +269,40 @@
         function showSetupScreen() {
             document.getElementById('setup-screen').style.display = 'flex';
             document.getElementById('main-interface').style.display = 'none';
+            loadRecentProjects();
+        }
+
+        async function loadRecentProjects() {
+            try {
+                const response = await fetch('/api/project/recent');
+                const result = await response.json();
+                
+                const recentSection = document.getElementById('recent-projects-section');
+                const recentList = document.getElementById('recent-projects-list');
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    recentSection.style.display = 'block';
+                    recentList.innerHTML = '';
+                    
+                    result.data.forEach(project => {
+                        const projectItem = document.createElement('div');
+                        projectItem.className = 'recent-project-item';
+                        projectItem.innerHTML = `
+                            <div class="recent-project-info">
+                                <div class="recent-project-name">${escapeHtml(project.name)}</div>
+                                <div class="recent-project-path">${escapeHtml(project.path)}</div>
+                            </div>
+                            <button class="dark-button" onclick="openRecentProject('${escapeHtml(project.path)}')">Open</button>
+                        `;
+                        recentList.appendChild(projectItem);
+                    });
+                } else {
+                    recentSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading recent projects:', error);
+                document.getElementById('recent-projects-section').style.display = 'none';
+            }
         }
 
         function showMainInterface() {
