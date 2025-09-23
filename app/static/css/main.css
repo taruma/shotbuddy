@@ -336,12 +336,12 @@
             object-fit: cover;
             border: 1px solid #505050;
             background: #404040;
-            cursor: pointer;
+            cursor: default;
         }
 
         .video-thumbnail {
             position: relative;
-            cursor: pointer;
+            cursor: default;
         }
 
 
@@ -367,7 +367,7 @@
 
         .lipsync-thumbnail {
             position: relative;
-            cursor: pointer;
+            cursor: default;
         }
 
 
@@ -381,6 +381,8 @@
             border-radius: 4px;
             font-size: 11px;
             font-weight: 500;
+            cursor: pointer;
+            user-select: none;
         }
 
         .prompt-button {
