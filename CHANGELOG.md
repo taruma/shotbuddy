@@ -1,5 +1,27 @@
 # Changelog
 
+## v2.1.0 (September 23, 2025) - by Taruma Sakti
+
+This minor release introduces enhanced backend performance and new reordering capabilities for improved project management workflows. All changes maintain backward compatibility while providing better user experience for shot organization.
+
+### Added
+- **Enhanced Shot Reordering**: New modal interface with filtering and drag support for improved project organization workflow
+- **Progressive Web App Support**: Added favicon and manifest files for better web app experience
+
+### Changed
+- **Backend Architecture**: Refactored thumbnail cache to per-project directories for improved performance and organization
+- **Thumbnail Rendering**: Improved aspect ratio handling to preserve original image proportions
+- **UI Polish**: Updated grid layout and header styles for better visual consistency
+
+### Technical Updates
+- **Performance**: Optimized file handling and caching mechanisms
+- **Code Quality**: Enhanced service layer architecture and route handling
+
+### AI Development Attribution
+This release was developed with AI assistance using Cline's Plan/Act workflow, powered by a mix of GPT-5 and Qwen3 Coder models. All generated changes were manually reviewed, tested, and refined by the maintainer, Taruma Sakti, to ensure quality and alignment with project goals.
+
+This version focuses on backend improvements and enhanced user experience for shot management workflows.
+
 ## v2.0.0 (September 23, 2025) - by Taruma Sakti
 
 This major release extends the original Shotbuddy v1.0.0 by Albert Bozesan with new features focused on enhanced navigation, asset management, and usability for AI filmmaking workflows. All changes are backward-compatible, preserving legacy single-image support while adding project-scoped metadata and modern UI elements.
