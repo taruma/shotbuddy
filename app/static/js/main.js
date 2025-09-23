@@ -453,7 +453,7 @@
                 const item = document.createElement('li');
                 item.className = 'toc-item';
                 item.innerHTML = shot.display_name
-                    ? `${escapeHtml(shot.display_name)} <span class="shot-code">(${shot.name})</span>`
+                    ? `<span class="shot-display-name">${escapeHtml(shot.display_name)}</span> <span class="shot-code">(${shot.name})</span>`
                     : shot.name;
                 item.dataset.target = `shot-row-${shot.name}`;
                 item.addEventListener('click', () => scrollToShot(shot.name));
@@ -474,7 +474,7 @@
                     const item = document.createElement('li');
                     item.className = 'toc-item archived';
                     item.innerHTML = shot.display_name
-                        ? `${escapeHtml(shot.display_name)} <span class="shot-code">(${shot.name})</span>`
+                        ? `<span class="shot-display-name">${escapeHtml(shot.display_name)}</span> <span class="shot-code">(${shot.name})</span>`
                         : shot.name;
                     item.dataset.target = `shot-row-${shot.name}`;
                     item.addEventListener('click', () => scrollToShot(shot.name));

@@ -201,6 +201,10 @@ body.light {
     opacity: 1;
 }
 
+.shot-display-name {
+    font-weight: bold;
+}
+
 /* Grid-specific shot code (below display name) */
 .shot-name .shot-code {
     display: block;
@@ -377,6 +381,14 @@ body.light {
 
 .light .modal {
     background: rgba(0,0,0,0.2);
+}
+
+.shot-display-name {
+    font-weight: bold;
+}
+
+.light .shot-display-name {
+    font-weight: bold;
 }
 
 /* New Project UI Styles */
