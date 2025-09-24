@@ -108,47 +108,54 @@ Notes on individual shots can be made easily.
 
 ![Shotbuddy_04](https://github.com/user-attachments/assets/7567416e-3f4b-42d0-888c-b8296b261616)
 
-## New features in this fork
+### New Features in this Fork (v2.0.0 to v3.0.0)
 
-Quickly rearrange the sequence directly in the grid. Drag a shot to a new position to reflect the intended order without touching your source assets. The new order is saved with the project so it stays consistent across sessions.
-![](https://github.com/user-attachments/assets/54f8adad-a111-4189-a390-426fb770943a)
+This fork significantly enhances Shotbuddy with a focus on improving the user experience for AI filmmaking workflows. 
 
-When a shot is not active but you want to keep all its assets, archive it. Archived shots are hidden from the main grid but remain fully preserved and can be restored at any time.
-![](https://github.com/user-attachments/assets/8c1172ea-a78b-4020-90df-e8234ab3d6c4)
+![](https://github.com/user-attachments/assets/98ec6697-9437-4b44-a1f3-6a34c3b38210)
 
-Use the TOC panel to scan your project at a glance and jump to any shot instantly. It provides a compact overview, improves navigation for larger projects, and pairs well with reordering and archiving.
-![](https://github.com/user-attachments/assets/c61cf6d3-c1c6-4f4a-ac97-d6c69afcf233)
+Key new features include:
 
-Give any shot a friendly title separate from its technical code. Display names improve readability in the grid and TOC and make collaboration easier without changing how files are stored.
-![](https://github.com/user-attachments/assets/91683e86-46b5-4541-bcd0-2c98a17aa86f)
+**Streamlined Project Management:**
+*   **Intuitive Project Information Management:** Easily create, load, and save detailed project information including title, description, tags, and version.
 
-Choose which version should be treated as the “latest” for downstream tools, and quickly cycle through versions in the UI. This makes auditioning iterations and locking the chosen take fast and traceable.
-![](https://github.com/user-attachments/assets/82471148-69ba-449f-8a06-ac9e1165820c)
+![](https://github.com/user-attachments/assets/036ea74c-f148-4e9a-93e3-850093bb1241)
 
-Mark representative “first” and “last” frames to communicate shot intent and transitions. These variants are handy for storyboards, reviews, or cut-in/out references.
-![](https://github.com/user-attachments/assets/b25e1f6a-b3f4-4463-82ae-095b4aab172b)
+*   **Clear Project Overview:** The project header now displays the project version and subtitle, giving you more context at a glance.
 
-Add short captions to assets to capture intent, context, or review notes. Captions are stored with each shot’s metadata and can be surfaced in the UI for quick reference. The notes field automatically expands to fit longer comments, so you can write comfortably without manual resizing.
-![](https://github.com/user-attachments/assets/c8b89756-fa3f-4394-b7fa-e843df87d1ae)
+![](https://github.com/user-attachments/assets/87a8915e-14f0-461b-8836-a1bda85b0dd3)
 
-Switch between themes for different environments and preferences. The header and menu layout have been streamlined for clarity and faster navigation.
-![](https://github.com/user-attachments/assets/b7c44d15-0d0c-4c6d-8b6a-a659335d4f6b)
+*   **Quick Access to Recent Projects:** Your most recent projects are easily accessible, with the current project always at the top of the list.
+*   **Comprehensive Table of Shots (TOC) Panel:** A responsive side panel that provides an overview of all your shots, with filtering, quick navigation, and clear separation of active and archived shots.
 
-Other improvements (developer experience & docs)
-- Shot metadata is now stored and managed at the project level, making multi‑project work more robust while keeping each project’s state self‑contained.
-- Uses uv and pyproject.toml for simpler, reproducible environments (uv sync, uv run).
-- Documentation cleanups and footer/attribution updates for clearer guidance.
+*   **Effortless Shot Reordering:** Drag and drop to reorder your shots directly in the grid, with changes saved automatically.
+*   **Flexible Shot Archiving:** Easily hide inactive shots from your main view and restore them with a single click from a dedicated archived section. 
+*   **Customizable Shot Display Names:** Give your shots human-readable titles (e.g., "Opening Scene" instead of SH010) for better clarity.
+*   **Project-Specific Data:** All your shot details and captions are now saved within each project, ensuring everything stays organized even when working on multiple projects.
+
+**Enhanced User Interface & Experience:**
+*   **Advanced Export Options:** A redesigned export modal allows you to precisely select which images and videos you want to export.
+*   **Instant Prompt Previews:** Hover over shot thumbnails to instantly see the associated prompt text.
+*   **Convenient "Back to Top" Button:** Quickly scroll to the top of long pages with a floating button.
+*   **Seamless Light/Dark Theme Toggle:** Switch between light and dark themes with a single click, with your preference saved automatically.
+*   **Improved Shot Readability:** Shot display names in the table of contents are now bold for better visibility.
+
+**Powerful Asset Management:**
+*   **First/Last Image Variants:** Manage separate opening and closing frames for each shot, each with its own versions, prompts, and thumbnails.
+*   **Effortless Asset Versioning:** Easily cycle through and promote different versions of your images and videos, with automatic updates to thumbnails.
+*   **Integrated Asset Captions:** Add editable notes or feedback directly under your media previews, saved automatically with each shot.
+*   **Dynamic Notes Editor:** Shot notes text areas automatically expand as you type, providing a smoother editing experience.
+*   **Optimized Asset Loading:** Faster UI updates when switching between asset versions, improving overall performance.
+
+**Productivity & Setup:**
+*   **Native Folder Selection:** Use your system's native file explorer to open and create projects, making file management more intuitive.
 
 ## Attribution
 - Forked from Shotbuddy by Albert Bozesan: https://github.com/albozes/shotbuddy (MIT License).
 - Maintained and extended by Taruma Sakti.
 
 ## AI assistance
-This project is maintained by Taruma Sakti and developed with AI assistance:
-- Cline (Plan/Act workflow)
-- Model mix: GPT‑5 and Qwen3 Coder
-
-All AI-assisted changes are reviewed and tested by the maintainer.
+This project is maintained by Taruma Sakti and developed with AI assistance. For detailed AI development attribution, see the [CHANGELOG.md].
 
 ## License
 This project is licensed under the [MIT License](./LICENSE.txt).
