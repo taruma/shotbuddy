@@ -1,99 +1,100 @@
-# Shotbuddy – Contributor Guide (Agents & Humans)
+# Shotbuddy Project Context
 
-This repository contains a Flask application for managing AI filmmaking shot assets (images/videos), with automatic versioning and “latest” asset management. Use this document to understand the layout, how to run the app, and contribution conventions.
+## Project Overview
+Shotbuddy is an application for managing AI-driven image-to-video filmmaking workflows. It supports structured organization, versioning, and annotation of generated stills and videos. The application provides a web interface for creating, managing, and organizing shots with drag-and-drop functionality.
 
-## Directory overview
+Key features include:
+- Shot management with versioned stills and videos
+- Automatic organization of latest versions
+- Prompt documentation and version history
+- Shot reordering and archiving
+- Display names for shots
+- Asset promotion and captioning
+- Thumbnail generation for images and videos
 
-- app/ – Main application package
-  - routes/ – Flask route blueprints
-  - services/ – File, project, and shot management logic
-  - config/ – App-level constants and configuration helpers
-  - templates/ – HTML templates
-  - static/ – Static files and generated thumbnails
-    - css/, js/, icons/, thumbnails/
-  - utils.py – Small helper utilities
-- run.py – Entry point to launch the Flask server (auto-opens browser when ready)
-- shotbuddy.cfg – Optional server configuration (INI)
-- README.md – User-facing documentation and features
-- pyproject.toml – Project metadata (Python ≥ 3.9), uv config
-- requirements.txt / requirements.in – Pinned and source dependency specs
-- LICENSE.txt, THIRD_PARTY_LICENSES.md – Licensing information
-- AGENTS.md – This guide
+## Technology Stack
+- **Backend**: Python 3.13.1+, Flask
+- **Frontend**: HTML/CSS/JavaScript (served by Flask)
+- **Dependencies**: flask, flask-cors, pillow, python-dotenv
+- **Build Tool**: uv (package manager and virtual environment tool)
 
-Note: A tests/ directory is not present at the moment.
+## Development Tooling
+This project uses `uv` as the primary tool for all Python development tasks including dependency management, running scripts, and virtual environment handling. 
 
-## Getting started
+**Important**: Avoid using `pip install` directly. Instead, use `uv` commands for all dependency management:
+- Use `uv add package_name` to add new dependencies
+- Use `uv remove package_name` to remove dependencies
+- Use `uv sync` to install all project dependencies
+- Use `uv run script_name.py` to run Python scripts
 
-Preferred (uv):
-1) Install uv (see https://docs.astral.sh/uv/)
-2) Create environment and install dependencies:
+## Project Structure
+```
+shotbuddy/
+├── app/                    # Main application code
+│   ├── __init__.py         # Flask app factory
+│   ├── routes/            # API routes (project_routes.py, shot_routes.py)
+│   ├── services/          # Business logic (shot_manager.py, file_handler.py)
+│   ├── config/            # Configuration (constants.py)
+│   └── static/            # Static assets (thumbnails, CSS, JS)
+├── shots/                  # Project data directory (created per project)
+│   ├── wip/               # Work-in-progress shot folders
+│   ├── latest_images/     # Latest image versions
+│   └── latest_videos/     # Latest video versions
+├── run.py                 # Application entry point
+├── shotbuddy.cfg          # Server configuration
+├── pyproject.toml         # Project metadata and dependencies
+├── requirements.txt       # Legacy dependencies list
+└── uploads/               # Temporary upload directory
+```
+
+## Building and Running
+
+### Prerequisites
+- Python 3.13.1 or newer
+- uv package manager
+
+### Installation
+1. Install uv: https://docs.astral.sh/uv/
+2. Clone the repository
+3. Create environment and install dependencies:
+   ```bash
    uv sync
-3) Run the development server:
+   ```
+   
+**Note**: This project uses `uv` for all dependency management. Do not use `pip install` directly as it may cause dependency conflicts or inconsistencies.
+
+### Running the Application
+1. Start the development server:
+   ```bash
    uv run run.py
-4) Open your browser:
-   The app will auto-open; default URL is http://127.0.0.1:5001/ unless configured.
+   ```
+2. Open browser at http://127.0.0.1:5001/ (default)
 
-Alternative (pip/venv):
-1) Create and activate a virtual environment
-   - Windows (PowerShell):
-     python -m venv .venv
-     .\.venv\Scripts\Activate.ps1
-   - macOS/Linux:
-     python3 -m venv .venv
-     source .venv/bin/activate
-2) Install dependencies:
-   pip install -r requirements.txt
-3) Run:
-   python run.py
-
-## Configuration
-
-Server settings can be specified in shotbuddy.cfg (INI) and/or environment variables. Environment variables override the file.
-
-shotbuddy.cfg:
+### Configuration
+Server settings can be configured in `shotbuddy.cfg`:
+```ini
 [server]
 host = 0.0.0.0
 port = 5001
+```
 
-Environment variables:
-- SHOTBUDDY_UPLOAD_FOLDER – temporary uploads directory (default: uploads)
-- SHOTBUDDY_HOST – server bind address (default: 127.0.0.1)
-- SHOTBUDDY_PORT – port (default: 5001)
-- SHOTBUDDY_DEBUG – 1/true/yes to enable Flask debug
+Environment variables can override config file settings:
+- `SHOTBUDDY_UPLOAD_FOLDER` - Upload directory (default: `uploads`)
+- `SHOTBUDDY_HOST` - Server host (default: `127.0.0.1`)
+- `SHOTBUDDY_PORT` - Server port (default: `5001`)
+- `SHOTBUDDY_DEBUG` - Enable Flask debug mode (set to `1`)
 
-## Project media layout (runtime)
+## Development Conventions
+- Uses Flask blueprints for route organization
+- Project-scoped data management with ShotManager service
+- JSON-based API responses with success/error structure
+- Thumbnail caching in project-specific directories
+- Version-controlled shot naming scheme (SH### or SH###_###)
+- Asset versioning with _v### suffix
+- All development tasks should use `uv` as the primary tool for dependency management and script execution
 
-Each project maintains a shots/ directory:
-shots/
-  wip/
-    SH###/
-      images/   # versioned stills
-      videos/   # versioned videos
-      lipsync/  # placeholder for future lipsync clips
-  latest_images/  # auto-maintained current image per shot
-  latest_videos/  # auto-maintained current video per shot
-
-See README.md for screenshots and workflow details.
-
-## Coding guidelines
-
-- Follow PEP 8 for Python. Keep route logic in app/routes/ and business logic in app/services/.
-- Use helpers in app.utils for path handling to avoid traversal and to keep paths consistent.
-- Store new static assets and templates under app/static/ and app/templates/, respectively.
-- Keep configuration separate from code. Prefer shotbuddy.cfg and env vars; do not hardcode ports/paths.
-- Update README.md and this AGENTS.md if you change setup, configuration, or top-level structure.
-
-## Testing
-
-There are currently no automated tests. Running:
-pytest -q
-should complete successfully (0 tests) and verifies the environment is set up. If/when tests are added, place them under tests/ and ensure they are runnable with pytest.
-
-## AI assistance and tooling
-Parts of the codebase were produced with AI assistance:
-- Cline (Plan/Act workflow)
-- Model mix: GPT‑5 and Qwen3 Coder
-
-All AI-assisted changes are reviewed and tested before merging.
-
-This AGENTS.md applies to the entire repository.
+## Key Components
+- **ShotManager**: Core service for shot operations, file management, and metadata handling
+- **ProjectManager**: Handles project state, recent projects, and current project tracking
+- **FileHandler**: Manages file uploads and asset processing
+- **Routes**: REST API endpoints for project and shot operations
