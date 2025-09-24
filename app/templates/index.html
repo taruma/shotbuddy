@@ -174,26 +174,26 @@
     <div id="project-info-modal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <h3 style="margin-bottom: 20px;">Project Information</h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Project Title</label>
-                <input id="project-info-title" type="text" style="width: 100%; padding: 8px; box-sizing: border-box;" placeholder="Enter project title" />
+            <div class="form-group">
+                <label class="form-label">Project Title</label>
+                <input id="project-info-title" type="text" class="form-input" placeholder="Enter project title" />
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Description</label>
-                <textarea id="project-info-description" style="width: 100%; height: 100px; padding: 8px; box-sizing: border-box; resize: vertical;" placeholder="Enter project description"></textarea>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="project-info-description" class="form-textarea" placeholder="Enter project description"></textarea>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Tags</label>
-                <input id="project-info-tags" type="text" style="width: 100%; padding: 8px; box-sizing: border-box;" placeholder="Enter tags separated by commas" />
+            <div class="form-group">
+                <label class="form-label">Tags</label>
+                <input id="project-info-tags" type="text" class="form-input" placeholder="Enter tags separated by commas" />
             </div>
-            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-                <div style="flex: 1;">
-                    <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Created</label>
-                    <input id="project-info-created" type="text" readonly style="width: 100%; padding: 8px; box-sizing: border-box; background-color: #333; cursor: default;" />
+            <div class="form-row">
+                <div class="form-group-half">
+                    <label class="form-label">Created</label>
+                    <input id="project-info-created" type="text" readonly class="form-input form-input-readonly" />
                 </div>
-                <div style="flex: 1;">
-                    <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Last Updated</label>
-                    <input id="project-info-updated" type="text" readonly style="width: 100%; padding: 8px; box-sizing: border-box; background-color: #333; cursor: default;" />
+                <div class="form-group-half">
+                    <label class="form-label">Last Updated</label>
+                    <input id="project-info-updated" type="text" readonly class="form-input form-input-readonly" />
                 </div>
             </div>
             <div class="modal-buttons">

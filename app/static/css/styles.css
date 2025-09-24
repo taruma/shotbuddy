@@ -427,6 +427,28 @@ body.light {
     background: rgba(0,0,0,0.2);
 }
 
+/* Light theme overrides for Project Information Modal form elements */
+.light .form-label {
+    color: #1a1a1a;
+}
+
+.light .form-input {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    color: #1a1a1a;
+}
+
+.light .form-textarea {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    color: #1a1a1a;
+}
+
+.light .form-input-readonly {
+    background-color: #f0f0f0;
+    color: #1a1a1a;
+}
+
 .shot-display-name {
     font-weight: bold;
 }
