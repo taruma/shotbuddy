@@ -134,6 +134,9 @@ def create_project():
         from app.utils import sanitize_path
         folder_path = sanitize_path(selected_folder).resolve()
 
+        # Remember the location used for project creation
+        project_manager.set_last_project_location(folder_path)
+
         # Create project via service (this handles recents correctly)
         project_info_obj = project_manager.create_project(folder_path, project_name)
 
@@ -194,6 +197,17 @@ def update_project_info():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@project_bp.route("/api/project/last-location")
+def get_last_project_location():
+    """Get the last location used for project creation"""
+    try:
+        project_manager = current_app.config['PROJECT_MANAGER']
+        last_location = project_manager.get_last_project_location()
+        return jsonify({"success": True, "data": {"path": last_location}})
+    except Exception as e:
+        logger.error("Error getting last project location: %s", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @project_bp.route("/api/system/browse-folder")
 def browse_folder():
     """Open a native folder picker dialog and return the selected path"""
@@ -221,7 +235,7 @@ def browse_folder():
             logger.info("Tkinter not available, trying alternative methods")
         except Exception as e:
             logger.warning("Tkinter failed: %s", e)
-        
+
         # Fallback: Return the user's home directory as a starting point
         # This allows the UI to show a sensible default and let the user manually edit the path
         import os

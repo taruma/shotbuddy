@@ -14,7 +14,8 @@ class ProjectManager:
         self.projects = {
             'current_project': None,
             'recent_projects': [],
-            'last_scanned': {}
+            'last_scanned': {},
+            'last_project_location': None
         }
         self.ensure_config_dir()
         self.load_projects()
@@ -37,6 +38,9 @@ class ProjectManager:
                     self.projects['last_scanned'] = {
                         str(Path(p).resolve()): ts for p, ts in loaded_scanned.items()
                     }
+                    # Ensure last_project_location exists
+                    if 'last_project_location' not in self.projects:
+                        self.projects['last_project_location'] = None
             except Exception as e:
                 logger.warning("Failed to load projects.json: %s", e)
         logger.info("Loaded current project: %s", self.projects.get('current_project'))
@@ -48,6 +52,17 @@ class ProjectManager:
             logger.info("Saved current project: %s", self.projects.get('current_project'))
         except Exception as e:
             logger.warning("Failed to save projects.json: %s", e)
+
+    def get_last_project_location(self):
+        """Get the last location used for project creation"""
+        return self.projects.get('last_project_location')
+
+    def set_last_project_location(self, location):
+        """Set the last location used for project creation"""
+        from app.utils import sanitize_path
+        location = str(sanitize_path(location).resolve())
+        self.projects['last_project_location'] = location
+        self.save_projects()
 
     def get_project_info_file_path(self, project_path):
         """Return the path to the project info file."""

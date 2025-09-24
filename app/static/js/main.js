@@ -165,9 +165,24 @@
             }
         }
 
-        function openCreateProjectModal() {
+        async function openCreateProjectModal() {
             document.getElementById('new-project-name').value = '';
-            document.getElementById('new-project-location').value = '';
+            
+            // Get the last project location and set it as default
+            try {
+                const response = await fetch('/api/project/last-location');
+                const result = await response.json();
+                
+                if (result.success && result.data.path) {
+                    document.getElementById('new-project-location').value = result.data.path;
+                } else {
+                    document.getElementById('new-project-location').value = '';
+                }
+            } catch (error) {
+                console.error('Error fetching last project location:', error);
+                document.getElementById('new-project-location').value = '';
+            }
+            
             document.getElementById('create-project-modal').style.display = 'flex';
             document.getElementById('new-project-name').focus();
         }
