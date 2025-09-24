@@ -1315,3 +1315,33 @@
             border-top: 3px solid #1a1a1a;
             border-right: 3px solid #1a1a1a;
         }
+
+/* Compact Project Info Modal */
+#project-info-modal .modal-content {
+    max-width: 560px; /* was inline style 600px; keep similar but slightly tighter */
+    padding: 20px;    /* reduce padding from 30px default for this modal */
+}
+#project-info-modal .form-group {
+    margin-bottom: 10px; /* was 15px */
+}
+#project-info-modal .form-input,
+#project-info-modal .form-textarea {
+    padding: 6px 8px; /* slightly tighter controls */
+}
+#project-info-modal .modal-buttons {
+    margin-top: 12px; /* was 20px */
+}
+/* Inline label + input */
+.form-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.form-inline .form-label {
+    margin: 0; /* remove bottom margin */
+    min-width: max-content;
+}
+.form-inline .form-input {
+    flex: 1;
+    margin: 0;
+}
