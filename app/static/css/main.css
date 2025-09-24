@@ -163,10 +163,30 @@
             gap: 10px;
         }
 
+        .project-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .project-title {
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 700;
             color: #e5e5e5;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .project-title .project-version {
+            font-size: 0.7em;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .project-subtitle {
+            font-size: 14px;
+            color: #b5b5b5;
         }
 
         /*.new-shot-btn {

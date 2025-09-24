@@ -331,10 +331,30 @@
             }
         }
 
+        function updateProjectHeader(info, fallbackName) {
+            const titleEl = document.getElementById('project-title-text');
+            const versionEl = document.getElementById('project-version');
+            const subtitleEl = document.getElementById('project-subtitle');
+            if (!titleEl || !versionEl || !subtitleEl) return;
+
+            const title = (info && info.title) ? info.title : (fallbackName || 'Untitled Project');
+            const version = (info && info.version) ? `v${info.version}` : '';
+            const subtitle = (info && info.short_description) ? info.short_description : '';
+
+            titleEl.textContent = title;
+            versionEl.textContent = version;
+            subtitleEl.textContent = subtitle;
+
+            // Hide version element if no version
+            versionEl.style.display = version ? 'inline' : 'none';
+            // Hide subtitle row if empty
+            subtitleEl.style.display = subtitle ? 'block' : 'none';
+        }
+
         function showMainInterface() {
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('main-interface').style.display = 'block';
-            document.getElementById('project-title').textContent = currentProject.name;
+            updateProjectHeader(currentProject.info || {}, currentProject.name);
             const input = document.getElementById('manual-path-input');
             if (input && currentProject && currentProject.path) {
                 input.value = currentProject.path;
@@ -1840,15 +1860,11 @@ async function saveProjectInfo() {
         if (result.success) {
             showNotification('Project information saved successfully');
             closeProjectInfoModal();
-            
-            // Update the project title in the header if it changed
-            if (result.data.title && currentProject && typeof currentProject === 'object' && result.data.title !== currentProject.info?.title) {
-                document.getElementById('project-title').textContent = result.data.title;
-                // Also update the current project object
-                if (currentProject) {
-                    currentProject.info = result.data;
-                }
-            }
+
+            // Update the project header with saved values
+            updateProjectHeader(result.data || {}, currentProject && currentProject.name);
+            // Keep local cache coherent
+            if (currentProject) currentProject.info = result.data;
         } else {
             showNotification(result.error || 'Failed to save project information', 'error');
         }

@@ -27,6 +27,15 @@ body.light {
     color: #1a1a1a;
 }
 
+.light .project-title .project-version {
+    opacity: 0.7;
+    color: #555;
+}
+
+.light .project-subtitle {
+    color: #666;
+}
+
 .light .shot-grid {
     background: #ffffff;
     box-shadow: 0 2px 20px rgba(0,0,0,0.08);
