@@ -556,3 +556,40 @@ body.light {
 .light .floating-theme-toggle {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
+
+/* Light theme: Export modal */
+.light .modal-header h3 {
+    color: #1a1a1a;
+}
+
+.light .modal-header {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.light .export-options-group,
+.light .additional-options-group {
+    background: #f7f7f7;
+    border: 1px solid #e5e5e5;
+}
+
+.light .checkbox-text {
+    color: #1a1a1a;
+}
+
+.light .checkbox-label:hover {
+    color: #000;
+}
+
+.light .checkbox-custom {
+    background: #ffffff;
+    border-color: #bbbbbb;
+}
+
+.light .export-checkbox:checked + .checkbox-custom {
+    background: #00c851;
+    border-color: #00c851;
+}
+
+.light .export-modal-content .modal-buttons {
+    border-top: 1px solid #e5e5e5;
+}
