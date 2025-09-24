@@ -99,9 +99,13 @@ def open_project():
         # Update project manager state
         path_str = str(project_path)
         project_manager.projects['current_project'] = path_str
-        if path_str not in project_manager.projects['recent_projects']:
-            project_manager.projects['recent_projects'].insert(0, path_str)
-            project_manager.projects['recent_projects'] = project_manager.projects['recent_projects'][:3]
+
+        # Always move the project to the front of recent projects
+        recents = project_manager.projects.get('recent_projects', [])
+        if path_str in recents:
+            recents.remove(path_str)
+        recents.insert(0, path_str)
+        project_manager.projects['recent_projects'] = recents[:3]
 
         last_scanned = project_manager.projects.get('last_scanned', {}).get(path_str)
         folder_mtime = project_path.stat().st_mtime

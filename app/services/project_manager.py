@@ -173,9 +173,16 @@ class ProjectManager:
         path = sanitize_path(path).resolve()
         path_str = str(path)
         self.projects['current_project'] = path_str
-        if path_str not in self.projects['recent_projects']:
-            self.projects['recent_projects'].insert(0, path_str)
-            self.projects['recent_projects'] = self.projects['recent_projects'][:3]
+
+        # Always move the project to the front of recent projects
+        if path_str in self.projects['recent_projects']:
+            self.projects['recent_projects'].remove(path_str)
+        self.projects['recent_projects'].insert(0, path_str)
+        self.projects['recent_projects'] = self.projects['recent_projects'][:3]
+
+        # Update the last_scanned timestamp
+        self.projects['last_scanned'][path_str] = datetime.now().isoformat()
+
         self.save_projects()
 
     def get_current_project(self):
@@ -217,4 +224,3 @@ class ProjectManager:
 
         logger.error("No valid project found.")
         return None
-
