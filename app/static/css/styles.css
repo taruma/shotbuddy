@@ -38,7 +38,7 @@ body.light {
 }
 
 .light .grid-header-cell {
-    color: #505050;
+    color: #1a1a1a;
 }
 
 .light .shot-row:hover {
@@ -158,11 +158,55 @@ body.light {
 }
 
 .light .drag-handle-info {
-    color: #777;
+    color: #444;
 }
 
 .light .icon-btn {
-    color: #606060;
+    color: #333;
+}
+
+.light .drop-placeholder .text {
+    color: #666;
+}
+
+.light .version-badge {
+    color: #1a1a1a;
+}
+
+.light .prompt-button {
+    color: #333;
+}
+
+.light .notes-input::placeholder {
+    color: #888;
+}
+
+.light .asset-caption-input::placeholder {
+    color: #888;
+}
+
+.light .shot-row.archived {
+    opacity: 0.7;
+}
+
+.light .archived-header {
+    color: #444;
+}
+
+.light .archived-header:hover {
+    color: #1a1a1a;
+}
+
+.light .reorder-item .shot-code {
+    color: #666;
+}
+
+.light .version-text {
+    color: #666;
+}
+
+.light .recent-project-path {
+    color: #666;
 }
 
 .light .icon-btn:hover {
@@ -466,4 +510,9 @@ body.light {
 
 .light .link-button:hover {
     color: #000;
+}
+
+/* Light theme for floating theme toggle */
+.light .floating-theme-toggle {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }

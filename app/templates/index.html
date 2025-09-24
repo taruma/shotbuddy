@@ -14,6 +14,9 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
 </head>
 <body>
+    <!-- Floating Theme Toggle -->
+    <button id="theme-toggle" class="dark-button icon-button floating-theme-toggle" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">🌙</button>
+    
     <div class="menu-bar">
         <div class="container">
             <div class="setup-panel">
@@ -80,8 +83,7 @@
                 <div class="container">
                     <h1 class="project-title" id="project-title">Loading...</h1>
                     <div class="header-controls">
-                        <button id="theme-toggle" class="dark-button icon-button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">🌙</button>
-                        <button class="dark-button icon-button" onclick="openShotsFolder()"" title="Open Project Shots Folder">
+                        <button class="dark-button icon-button" onclick="openShotsFolder()"\ title="Open Project Shots Folder">
                             <img src="{{ url_for('static', filename='icons/folder_24.png') }}" alt="Open Project Shots Folder" />
                         </button>
                         <button class="dark-button icon-button" onclick="openProjectInfoModal()" title="Project Information" aria-label="Project Information">ℹ️</button>
