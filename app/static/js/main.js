@@ -1015,15 +1015,67 @@
                     if (idx !== -1) {
                         shots[idx] = updated;
                     }
-                    captureScroll(`shot-row-${shotName}`);
-                    renderShots();
-                    restoreScroll();
+                    
+                    // Update only the specific drop zone instead of full render
+                    updateDropZoneForShot(shotName, assetType, updated);
                 } else {
                     showNotification(result.error || 'Failed to switch version', 'error');
                 }
             } catch (error) {
                 console.error('Promote failed:', error);
                 showNotification('Failed to switch version', 'error');
+            }
+        }
+
+        // Helper function to update a specific drop zone
+        function updateDropZoneForShot(shotName, assetType, shotData) {
+            const assetInfo = shotData[assetType];
+            if (!assetInfo) return;
+
+            // Find the specific drop zone for this shot and asset type
+            const shotRow = document.getElementById(`shot-row-${shotName}`);
+            if (!shotRow) return;
+
+            // Get the drop zone based on asset type - they appear in specific order after action-cell:
+            // [0] action-cell, [1] shot-name, [2] first_image, [3] last_image, [4] video, [5] notes
+            let dropZone = null;
+            if (assetType === 'first_image') {
+                dropZone = shotRow.children[2]; // first child after action and name
+            } else if (assetType === 'last_image') {
+                dropZone = shotRow.children[3];
+            } else if (assetType === 'video') {
+                dropZone = shotRow.children[4];
+            }
+
+            if (!dropZone || !dropZone.classList.contains('drop-zone')) return;
+
+            // Update the version badge
+            const versionBadge = dropZone.querySelector('.version-badge');
+            if (versionBadge) {
+                versionBadge.textContent = `v${String(assetInfo.current_version).padStart(3, '0')}`;
+            }
+
+            // Update the thumbnail
+            const filePreview = dropZone.querySelector('.file-preview');
+            if (filePreview) {
+                const thumbnailContainer = filePreview.querySelector('.preview-thumbnail, .video-thumbnail');
+                if (thumbnailContainer && assetInfo.thumbnail) {
+                    // Force thumbnail refresh by adding timestamp parameter
+                    const newThumbnailUrl = `${assetInfo.thumbnail}?v=${Date.now()}`;
+                    if (thumbnailContainer.tagName.toLowerCase() === 'img') {
+                        thumbnailContainer.src = newThumbnailUrl;
+                    } else {
+                        // For video thumbnails (div with background-image)
+                        thumbnailContainer.style.backgroundImage = `url('${newThumbnailUrl}')`;
+                    }
+                }
+            }
+
+            // Update the prompt button data attributes
+            const promptButton = dropZone.querySelector('.prompt-button');
+            if (promptButton) {
+                promptButton.setAttribute('data-current-version', assetInfo.current_version);
+                promptButton.setAttribute('data-max-version', assetInfo.max_version);
             }
         }
 
