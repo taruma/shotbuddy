@@ -21,16 +21,17 @@ The application automatically manages the latest versions in `latest_images` and
 ## Requirements
 
 - **Python**: >= 3.13.1
-  This project requires Python 3.13.1 or newer. pip and uv enforce this when installing; attempting to install with an older interpreter will fail with a message referencing the package's requires-python metadata.
+  This project requires Python 3.13.1 or newer.
 
 ## Installation
 
 Using uv
 
 1. Install uv
+
    See https://docs.astral.sh/uv/
 
-2. Clone the repository
+4. Clone the repository
 
    ```bash
    git clone https://github.com/taruma/shotbuddy.git
@@ -39,42 +40,21 @@ Using uv
    cd shotbuddy
    ```
 
-3. Create the environment and install dependencies
+5. Create the environment and install dependencies
 
    ```bash
    uv sync
    ```
 
-4. Run the development server
+6. Run the development server
 
    ```bash
    uv run run.py
    ```
 
-5. Open your browser
+7. Open your browser
 
    By default, Shotbuddy will be available at http://127.0.0.1:5001/
-
-## Configuration
-
-Server settings can be defined in the `shotbuddy.cfg` file located in the
-repository root. The file uses INI syntax and contains a `[server]` section with
-`host` and `port` keys:
-
-```ini
-[server]
-host = 0.0.0.0
-port = 5001
-```
-
-Values specified via environment variables override those in `shotbuddy.cfg`.
-Available variables are:
-
-- `SHOTBUDDY_UPLOAD_FOLDER` – directory used for temporary uploads (default:
-  `uploads`).
-- `SHOTBUDDY_HOST` – address the Flask server binds to (default: `127.0.0.1`).
-- `SHOTBUDDY_PORT` – port number for the development server (default: `5001`).
-- `SHOTBUDDY_DEBUG` – set to `1` to enable Flask debug mode.
 
 ## Functionality
 Shotbuddy has a straightforward interface, similar to existing shotlist applications, but optimized for AI filmmakers.
@@ -110,6 +90,8 @@ Notes on individual shots can be made easily.
 
 ### New Features in this Fork (v2.0.0 to v3.0.0)
 
+<img width="347" height="103" alt="image" src="https://github.com/user-attachments/assets/a5b04523-d584-4958-9e13-8d95eb99aefd" />
+
 This fork significantly enhances Shotbuddy with a focus on improving the user experience for AI filmmaking workflows. 
 
 ![](https://github.com/user-attachments/assets/98ec6697-9437-4b44-a1f3-6a34c3b38210)
@@ -118,27 +100,38 @@ Key new features include:
 
 **Streamlined Project Management:**
 *   **Intuitive Project Information Management:** Easily create, load, and save detailed project information including title, description, tags, and version.
-
-![](https://github.com/user-attachments/assets/036ea74c-f148-4e9a-93e3-850093bb1241)
-
 *   **Clear Project Overview:** The project header now displays the project version and subtitle, giving you more context at a glance.
 
-![](https://github.com/user-attachments/assets/87a8915e-14f0-461b-8836-a1bda85b0dd3)
+![demo-sb-03](https://github.com/user-attachments/assets/4dd9a394-2110-42db-91f8-a333fbfd948c)
 
 *   **Quick Access to Recent Projects:** Your most recent projects are easily accessible, with the current project always at the top of the list.
 *   **Comprehensive Table of Shots (TOC) Panel:** A responsive side panel that provides an overview of all your shots, with filtering, quick navigation, and clear separation of active and archived shots.
 
+![demo-sb-02](https://github.com/user-attachments/assets/e7ce1616-8936-49e8-a3fa-45403cd92203)
+
 *   **Effortless Shot Reordering:** Drag and drop to reorder your shots directly in the grid, with changes saved automatically.
+
+![demo-sb-01](https://github.com/user-attachments/assets/c327eb21-b52d-4163-be52-c5d1c3178bce)
+
 *   **Flexible Shot Archiving:** Easily hide inactive shots from your main view and restore them with a single click from a dedicated archived section. 
 *   **Customizable Shot Display Names:** Give your shots human-readable titles (e.g., "Opening Scene" instead of SH010) for better clarity.
+
+![demo-sb-04](https://github.com/user-attachments/assets/0d87067d-def9-4d4e-a140-ee1188288d42)
+
 *   **Project-Specific Data:** All your shot details and captions are now saved within each project, ensuring everything stays organized even when working on multiple projects.
 
 **Enhanced User Interface & Experience:**
 *   **Advanced Export Options:** A redesigned export modal allows you to precisely select which images and videos you want to export.
+
+<img width="511" height="702" alt="image" src="https://github.com/user-attachments/assets/d1c0f1bb-d897-464b-bd07-0ca8559d9900" />
+
 *   **Instant Prompt Previews:** Hover over shot thumbnails to instantly see the associated prompt text.
-*   **Convenient "Back to Top" Button:** Quickly scroll to the top of long pages with a floating button.
+
+![demo-sb-05](https://github.com/user-attachments/assets/816a40ec-000b-4f6f-807e-51dcd5b305f1)
+
 *   **Seamless Light/Dark Theme Toggle:** Switch between light and dark themes with a single click, with your preference saved automatically.
-*   **Improved Shot Readability:** Shot display names in the table of contents are now bold for better visibility.
+
+![demo-sb-06](https://github.com/user-attachments/assets/ec2f3e5e-33a3-4200-89cc-eae3cf70f1c6)
 
 **Powerful Asset Management:**
 *   **First/Last Image Variants:** Manage separate opening and closing frames for each shot, each with its own versions, prompts, and thumbnails.
@@ -147,15 +140,14 @@ Key new features include:
 *   **Dynamic Notes Editor:** Shot notes text areas automatically expand as you type, providing a smoother editing experience.
 *   **Optimized Asset Loading:** Faster UI updates when switching between asset versions, improving overall performance.
 
-**Productivity & Setup:**
-*   **Native Folder Selection:** Use your system's native file explorer to open and create projects, making file management more intuitive.
+![demo-sb-07](https://github.com/user-attachments/assets/4286dc1c-7df9-45f0-afd5-acbacf5255da)
 
 ## Attribution
 - Forked from Shotbuddy by Albert Bozesan: https://github.com/albozes/shotbuddy (MIT License).
 - Maintained and extended by Taruma Sakti.
 
 ## AI assistance
-This project is maintained by Taruma Sakti and developed with AI assistance. For detailed AI development attribution, see the [CHANGELOG.md].
+This project is maintained by Taruma Sakti and developed with AI assistance. For detailed AI development attribution, see the [CHANGELOG.md](./CHANGELOG.md).
 
 ## License
 This project is licensed under the [MIT License](./LICENSE.txt).
