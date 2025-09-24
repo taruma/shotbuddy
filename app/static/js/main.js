@@ -1866,9 +1866,23 @@ function closeExportModal() {
 
 async function confirmExport() {
     const exportName = document.getElementById('export-name').value.trim();
-    const exportType = document.getElementById('export-type').value;
+    const exportImages = document.getElementById('export-images').checked;
+    const exportVideos = document.getElementById('export-videos').checked;
     const includeDisplay = document.getElementById('include-display-in-filename').checked;
     const includeMetadata = document.getElementById('include-metadata').checked;
+
+    // Determine export type based on checkbox states
+    let exportType;
+    if (exportImages && exportVideos) {
+        exportType = 'all';
+    } else if (exportImages) {
+        exportType = 'images';
+    } else if (exportVideos) {
+        exportType = 'videos';
+    } else {
+        showNotification('Please select at least one export option (Images or Videos)', 'error');
+        return;
+    }
 
     try {
         const response = await fetch('/api/shots/export', {

@@ -234,32 +234,51 @@
 
     <!-- Export Modal -->
     <div id="export-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 10px;">Export Latest Assets</h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Export Name (optional)</label>
-                <input id="export-name" type="text" placeholder="Leave empty for timestamp" style="width: 100%;" />
+        <div class="modal-content export-modal-content">
+            <div class="modal-header">
+                <h3>Export Latest Assets</h3>
+                <button class="close-modal" onclick="closeExportModal()">&times;</button>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Export Type</label>
-                <select id="export-type" style="width: 100%;">
-                    <option value="all">Images and Videos</option>
-                    <option value="images">Images Only</option>
-                    <option value="videos">Videos Only</option>
-                </select>
+
+            <div class="export-form">
+                <div class="form-section">
+                    <label class="form-label">Export Name (optional)</label>
+                    <input id="export-name" type="text" placeholder="Leave empty for timestamp" class="form-input" />
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label">Export Options</label>
+                    <div class="export-options-group">
+                        <label class="checkbox-label">
+                            <input id="export-images" type="checkbox" checked class="export-checkbox" />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Export Images</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input id="export-videos" type="checkbox" checked class="export-checkbox" />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Export Videos</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label">Additional Options</label>
+                    <div class="additional-options-group">
+                        <label class="checkbox-label">
+                            <input id="include-display-in-filename" type="checkbox" checked class="export-checkbox" />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Include display name in filenames</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input id="include-metadata" type="checkbox" checked class="export-checkbox" />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Include metadata summary (.md file)</span>
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center;">
-                    <input id="include-display-in-filename" type="checkbox" checked style="margin-right: 8px;" />
-                    Include display name in filenames
-                </label>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center;">
-                    <input id="include-metadata" type="checkbox" checked style="margin-right: 8px;" />
-                    Include metadata summary (.md file)
-                </label>
-            </div>
+
             <div class="modal-buttons">
                 <button class="green-button" onclick="confirmExport()">Export</button>
                 <button class="dark-button" onclick="closeExportModal()">Cancel</button>
