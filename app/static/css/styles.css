@@ -214,6 +214,15 @@ body.light {
     color: #000;
 }
 
+/* Light theme overrides for icon buttons with text */
+.light .icon-button .button-text {
+    color: #1a1a1a;
+}
+
+.light .green-button.icon-button .button-text {
+    color: #1a1a1a;
+}
+
 .light .shot-row {
     border-bottom: 1px solid #e5e5e5;
 }

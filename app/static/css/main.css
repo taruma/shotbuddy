@@ -45,6 +45,37 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+        
+        .icon-button {
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-button img {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Enhanced button with icon and text */
+        .icon-button.has-text {
+            padding: 8px 16px;
+        }
+        
+        .icon-button .button-text {
+            margin-left: 8px;
+            font-weight: 600;
+        }
+        
+        .green-button.icon-button {
+            padding: 10px 16px;
+        }
+        
+        .green-button.icon-button .button-text {
+            margin-left: 8px;
+            font-weight: 600;
+        }
 
         .dark-button:hover {
             background: #505050;

@@ -83,13 +83,34 @@
                 <div class="container">
                     <h1 class="project-title" id="project-title">Loading...</h1>
                     <div class="header-controls">
-                        <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder">
+                        <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder" aria-label="Open Project Shots Folder">
                             <img src="{{ url_for('static', filename='icons/folder_24.png') }}" alt="Open Project Shots Folder" />
                         </button>
-                        <button class="dark-button icon-button" onclick="showSetupScreen()" title="Back to Menu" aria-label="Back to Menu">🏠</button>
-                        <button class="dark-button icon-button" onclick="openProjectInfoModal()" title="Project Information" aria-label="Project Information">ℹ️</button>
-                        <button class="dark-button" onclick="openReorderModal()">Reorder</button>
-                        <button class="green-button" onclick="addNewShot()">New Shot +</button>
+                        <button class="dark-button icon-button" onclick="showSetupScreen()" title="Back to Menu" aria-label="Back to Menu">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"></path>
+                            </svg>
+                        </button>
+                        <button class="dark-button icon-button" onclick="openProjectInfoModal()" title="Project Information" aria-label="Project Information">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </button>
+                        <button class="dark-button icon-button" onclick="openReorderModal()" title="Reorder Shots" aria-label="Reorder Shots">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12H3"></path>
+                                <path d="M16 7l-5 5 5 5"></path>
+                            </svg>
+                        </button>
+                        <button class="green-button icon-button has-text" onclick="addNewShot()" title="Add New Shot" aria-label="Add New Shot">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span class="button-text">New Shot</span>
+                        </button>
                     </div>
                 </div>
             </div>
