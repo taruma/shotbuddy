@@ -77,18 +77,19 @@
     <!-- Main Interface (hidden initially) -->
     <div id="main-interface" style="display: none;">
         <div class="header">
-            <div class="container">
-                <h1 class="project-title" id="project-title">Loading...</h1>
-                <div class="header-controls">
-                    <button id="theme-toggle" class="dark-button icon-button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">🌙</button>
-                    <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder">
-                        <img src="{{ url_for('static', filename='icons/folder_24.png') }}" alt="Open Project Shots Folder" />
-                    </button>
-                    <button class="dark-button" onclick="openReorderModal()">Reorder</button>
-                    <button class="green-button" onclick="addNewShot()">New Shot +</button>
+                <div class="container">
+                    <h1 class="project-title" id="project-title">Loading...</h1>
+                    <div class="header-controls">
+                        <button id="theme-toggle" class="dark-button icon-button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">🌙</button>
+                        <button class="dark-button icon-button" onclick="openShotsFolder()"" title="Open Project Shots Folder">
+                            <img src="{{ url_for('static', filename='icons/folder_24.png') }}" alt="Open Project Shots Folder" />
+                        </button>
+                        <button class="dark-button icon-button" onclick="openProjectInfoModal()" title="Project Information" aria-label="Project Information">ℹ️</button>
+                        <button class="dark-button" onclick="openReorderModal()">Reorder</button>
+                        <button class="green-button" onclick="addNewShot()">New Shot +</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <div class="container">
             <div class="loading" id="loading">Loading shots...</div>
@@ -163,6 +164,39 @@
             <div class="modal-buttons">
                 <button class="dark-button" onclick="saveReorder()">Save</button>
                 <button class="dark-button" onclick="closeReorderModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Information Modal -->
+    <div id="project-info-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 style="margin-bottom: 20px;">Project Information</h3>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Project Title</label>
+                <input id="project-info-title" type="text" style="width: 100%; padding: 8px; box-sizing: border-box;" placeholder="Enter project title" />
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Description</label>
+                <textarea id="project-info-description" style="width: 100%; height: 100px; padding: 8px; box-sizing: border-box; resize: vertical;" placeholder="Enter project description"></textarea>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Tags</label>
+                <input id="project-info-tags" type="text" style="width: 100%; padding: 8px; box-sizing: border-box;" placeholder="Enter tags separated by commas" />
+            </div>
+            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Created</label>
+                    <input id="project-info-created" type="text" readonly style="width: 100%; padding: 8px; box-sizing: border-box; background-color: #333; cursor: default;" />
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Last Updated</label>
+                    <input id="project-info-updated" type="text" readonly style="width: 100%; padding: 8px; box-sizing: border-box; background-color: #333; cursor: default;" />
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="green-button" onclick="saveProjectInfo()">Save</button>
+                <button class="dark-button" onclick="closeProjectInfoModal()">Close</button>
             </div>
         </div>
     </div>

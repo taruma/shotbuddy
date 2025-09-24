@@ -1769,7 +1769,93 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Expose functions globally
-        window.openReorderModal = openReorderModal;
-        window.closeReorderModal = closeReorderModal;
-        window.saveReorder = saveReorder;
+        // Project Information Modal Functions
+async function openProjectInfoModal() {
+    const modal = document.getElementById('project-info-modal');
+    if (!modal) return;
+    
+    try {
+        // Fetch project information
+        const response = await fetch('/api/project/info');
+        const result = await response.json();
+        
+        if (result.success) {
+            // Populate the modal with project info
+            document.getElementById('project-info-title').value = result.data.title || '';
+            document.getElementById('project-info-description').value = result.data.description || '';
+            document.getElementById('project-info-tags').value = result.data.tags ? result.data.tags.join(', ') : '';
+            document.getElementById('project-info-created').value = result.data.created ? new Date(result.data.created).toLocaleString() : '';
+            document.getElementById('project-info-updated').value = result.data.updated ? new Date(result.data.updated).toLocaleString() : '';
+            
+            // Show modal
+            modal.style.display = 'flex';
+        } else {
+            showNotification(result.error || 'Failed to load project information', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading project info:', error);
+        showNotification('Error loading project information', 'error');
+    }
+}
+
+function closeProjectInfoModal() {
+    const modal = document.getElementById('project-info-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function saveProjectInfo() {
+    const title = document.getElementById('project-info-title').value.trim();
+    const description = document.getElementById('project-info-description').value.trim();
+    const tagsInput = document.getElementById('project-info-tags').value.trim();
+    
+    // Parse tags (split by comma and trim whitespace)
+    const tags = tagsInput ? 
+        tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+        : [];
+    
+    // Prepare project info object
+    const projectInfo = {
+        title: title || (currentProject && typeof currentProject === 'object' && currentProject.name ? currentProject.name : 'Untitled Project'), // Use project name as default title if none provided
+        description: description,
+        tags: tags
+    };
+    
+    try {
+        const response = await fetch('/api/project/info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(projectInfo)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Project information saved successfully');
+            closeProjectInfoModal();
+            
+            // Update the project title in the header if it changed
+            if (result.data.title && currentProject && typeof currentProject === 'object' && result.data.title !== currentProject.info?.title) {
+                document.getElementById('project-title').textContent = result.data.title;
+                // Also update the current project object
+                if (currentProject) {
+                    currentProject.info = result.data;
+                }
+            }
+        } else {
+            showNotification(result.error || 'Failed to save project information', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving project info:', error);
+        showNotification('Error saving project information', 'error');
+    }
+}
+
+// Expose functions globally
+window.openProjectInfoModal = openProjectInfoModal;
+window.closeProjectInfoModal = closeProjectInfoModal;
+window.saveProjectInfo = saveProjectInfo;
+window.openReorderModal = openReorderModal;
+window.closeReorderModal = closeReorderModal;
+window.saveReorder = saveReorder;

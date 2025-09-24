@@ -80,10 +80,14 @@ def open_project():
         if not shots_dir.exists():
             return jsonify({"success": False, "error": "No recognizable project structure"}), 400
 
-        project_info = {
+        # Create project info file if it doesn't exist
+        project_info = project_manager.load_project_info(project_path)
+
+        project_data = {
             "name": project_path.name,
             "path": path_str,
             "created": datetime.fromtimestamp(project_path.stat().st_ctime).isoformat(),
+            "info": project_info,
             "shots": []
         }
 
@@ -111,7 +115,7 @@ def open_project():
             )
         project_manager.save_projects()
 
-        return jsonify({"success": True, "data": project_info})
+        return jsonify({"success": True, "data": project_data})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -136,10 +140,15 @@ def create_project():
         (project_dir / "_legacy").mkdir(exist_ok=True)
 
         resolved_dir = project_dir.resolve()
-        project_info = {
+        
+        # Create project information file
+        project_info = project_manager.create_project_info(resolved_dir, project_name)
+
+        project_data = {
             "name": project_name,
             "path": str(resolved_dir),
             "created": datetime.now().isoformat(),
+            "info": project_info,
             "shots": []
         }
 
@@ -152,8 +161,49 @@ def create_project():
         # Optional: sanity check (useful in dev)
         assert project_manager.get_current_project() is not None
 
-        return jsonify({"success": True, "data": project_info})
+        return jsonify({"success": True, "data": project_data})
     except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@project_bp.route("/api/project/info", methods=["GET"])
+def get_project_info():
+    """Get project information for the current project"""
+    try:
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if project:
+            return jsonify({"success": True, "data": project.get('info', {})})
+        return jsonify({"success": False, "error": "No current project"}), 400
+    except Exception as e:
+        logger.error("Error in get_project_info: %s", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@project_bp.route("/api/project/info", methods=["POST"])
+def update_project_info():
+    """Update project information for the current project"""
+    try:
+        project_manager = current_app.config['PROJECT_MANAGER']
+        data = request.get_json()
+        
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+        
+        # Get the project path
+        project_path = project['path']
+        
+        # Ensure project_path is a string (it might be a Path object)
+        if hasattr(project_path, '__fspath__'):  # It's a Path-like object
+            project_path = str(project_path)
+        
+        # Update project info
+        updated_info = project_manager.save_project_info(project_path, data)
+        
+        return jsonify({"success": True, "data": updated_info})
+    except Exception as e:
+        logger.error("Error in update_project_info: %s", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 

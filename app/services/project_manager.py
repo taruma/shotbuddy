@@ -49,6 +49,100 @@ class ProjectManager:
         except Exception as e:
             logger.warning("Failed to save projects.json: %s", e)
 
+    def get_project_info_file_path(self, project_path):
+        """Return the path to the project info file."""
+        # Convert to Path object if it's a string
+        project_path = Path(project_path)
+        return project_path / 'project_info.json'
+
+    def create_project_info(self, project_path, project_name):
+        """Create project info file with default information."""
+        # Convert to Path object if it's a string
+        project_path = Path(project_path)
+        project_info_path = self.get_project_info_file_path(project_path)
+        
+        # Create default project information
+        project_info = {
+            'title': project_name,
+            'description': '',
+            'tags': [],
+            'created': datetime.now().isoformat(),
+            'updated': datetime.now().isoformat(),
+            'version': '1.0.0'
+        }
+        
+        # Save the project info file
+        with open(project_info_path, 'w', encoding='utf-8') as f:
+            json.dump(project_info, f, indent=2, ensure_ascii=False)
+        
+        return project_info
+
+    def load_project_info(self, project_path):
+        """Load project information from file."""
+        # Convert to Path object if it's a string
+        project_path = Path(project_path)
+        project_info_path = self.get_project_info_file_path(project_path)
+        
+        if project_info_path.exists():
+            try:
+                with open(project_info_path, 'r', encoding='utf-8') as f:
+                    project_info = json.load(f)
+                    # Ensure all fields are present
+                    defaults = {
+                        'title': project_path.name,
+                        'description': '',
+                        'tags': [],
+                        'created': datetime.now().isoformat(),
+                        'updated': datetime.now().isoformat(),
+                        'version': '1.0.0'
+                    }
+                    for key, value in defaults.items():
+                        if key not in project_info:
+                            project_info[key] = value
+                    return project_info
+            except Exception as e:
+                logger.error("Failed to load project info: %s", e)
+                # Return default project info if loading fails
+                return {
+                    'title': project_path.name,
+                    'description': '',
+                    'tags': [],
+                    'created': datetime.now().isoformat(),
+                    'updated': datetime.now().isoformat(),
+                    'version': '1.0.0'
+                }
+        else:
+            # Create a default project info file if it doesn't exist yet
+            return self.create_project_info(project_path, project_path.name)
+
+    def save_project_info(self, project_path, info_data):
+        """Save project information to file."""
+        # Convert to Path object if it's a string
+        project_path = Path(project_path)
+        project_info_path = self.get_project_info_file_path(project_path)
+        
+        # Add/update the 'updated' timestamp
+        info_data['updated'] = datetime.now().isoformat()
+        
+        # Ensure all required fields are present
+        defaults = {
+            'title': project_path.name,
+            'description': '',
+            'tags': [],
+            'created': datetime.now().isoformat(),
+            'updated': datetime.now().isoformat(),
+            'version': '1.0.0'
+        }
+        for key, value in defaults.items():
+            if key not in info_data:
+                info_data[key] = value
+        
+        # Write to file
+        with open(project_info_path, 'w', encoding='utf-8') as f:
+            json.dump(info_data, f, indent=2, ensure_ascii=False)
+        
+        return info_data
+
     def create_project(self, project_path, project_name):
         from app.utils import sanitize_path
         project_dir = sanitize_path(project_path).resolve() / project_name
@@ -67,6 +161,9 @@ class ProjectManager:
             'created': datetime.now().isoformat(),
             'shots': []
         }
+
+        # Create project information file
+        self.create_project_info(resolved_dir, project_name)
 
         self.set_current_project(project_dir)
         return project_info
@@ -92,10 +189,13 @@ class ProjectManager:
 
         if shots_dir.exists():
             created = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
+            # Load project information
+            project_info = self.load_project_info(project_path)
             return {
                 'name': project_path.name,
                 'path': str(project_path),
                 'created': created,
+                'info': project_info,
                 'shots': []
             }
 
@@ -105,10 +205,13 @@ class ProjectManager:
                 logger.info("Falling back to recent project: %s", recent_path)
                 self.set_current_project(recent_path)
                 created = datetime.fromtimestamp(recent_path.stat().st_ctime).isoformat()
+                # Load project information
+                project_info = self.load_project_info(recent_path)
                 return {
                     'name': recent_path.name,
                     'path': str(recent_path),
                     'created': created,
+                    'info': project_info,
                     'shots': []
                 }
 
