@@ -383,6 +383,37 @@ def archive_shot():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@shot_bp.route("/export", methods=["POST"])
+def export_latest_assets():
+    try:
+        data = request.get_json()
+        export_name = data.get("export_name")
+        export_type = data.get("export_type", "all")
+        include_display_in_filename = data.get("include_display_in_filename", True)
+        include_metadata = data.get("include_metadata", True)
+
+        if export_type not in ['images', 'videos', 'all']:
+            return jsonify({"success": False, "error": "Invalid export_type"}), 400
+
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return jsonify({"success": False, "error": "No current project"}), 400
+
+        shot_manager = get_shot_manager(project["path"])
+        export_path = shot_manager.export_latest_assets(
+            export_name=export_name,
+            export_type=export_type,
+            include_display_in_filename=include_display_in_filename,
+            include_metadata=include_metadata
+        )
+
+        return jsonify({"success": True, "export_path": export_path})
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @shot_bp.route("/display-name", methods=["POST"])
 def set_display_name():
     try:

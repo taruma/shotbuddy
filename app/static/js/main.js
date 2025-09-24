@@ -1852,6 +1852,50 @@ async function saveProjectInfo() {
     }
 }
 
+// Export Modal Functions
+function openExportModal() {
+    document.getElementById('export-modal').style.display = 'flex';
+    document.getElementById('export-name').value = '';
+    document.getElementById('export-type').value = 'all';
+    document.getElementById('include-display-in-filename').checked = true;
+}
+
+function closeExportModal() {
+    document.getElementById('export-modal').style.display = 'none';
+}
+
+async function confirmExport() {
+    const exportName = document.getElementById('export-name').value.trim();
+    const exportType = document.getElementById('export-type').value;
+    const includeDisplay = document.getElementById('include-display-in-filename').checked;
+    const includeMetadata = document.getElementById('include-metadata').checked;
+
+    try {
+        const response = await fetch('/api/shots/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                export_name: exportName || null,
+                export_type: exportType,
+                include_display_in_filename: includeDisplay,
+                include_metadata: includeMetadata
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            closeExportModal();
+            showNotification(`Export created successfully at: ${result.export_path}`);
+        } else {
+            showNotification(result.error || 'Export failed', 'error');
+        }
+    } catch (error) {
+        console.error('Export failed:', error);
+        showNotification('Export failed', 'error');
+    }
+}
+
 // Expose functions globally
 window.openProjectInfoModal = openProjectInfoModal;
 window.closeProjectInfoModal = closeProjectInfoModal;
@@ -1859,3 +1903,6 @@ window.saveProjectInfo = saveProjectInfo;
 window.openReorderModal = openReorderModal;
 window.closeReorderModal = closeReorderModal;
 window.saveReorder = saveReorder;
+window.openExportModal = openExportModal;
+window.closeExportModal = closeExportModal;
+window.confirmExport = confirmExport;

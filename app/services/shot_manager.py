@@ -922,6 +922,158 @@ class ShotManager:
 
         return f"/api/shots/thumbnail/{thumb_filename}"
 
+    def export_latest_assets(self, export_name=None, export_type='all', include_display_in_filename=True, include_metadata=True):
+        """Export latest assets for non-archived shots in custom order."""
+        import shutil
+        from datetime import datetime
+        import re
+
+        # Get non-archived shots in order
+        non_archived_shots = [s for s in self.get_shots() if not s['archived']]
+        if not non_archived_shots:
+            raise ValueError("No non-archived shots found")
+
+        # Create export directory
+        exports_root = self.project_path / 'exports'
+        exports_root.mkdir(exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        export_dir_name = export_name or f'export_{timestamp}'
+        export_dir = exports_root / export_dir_name
+        export_dir.mkdir(exist_ok=True)
+
+        # Sanitize filename helper
+        def sanitize_filename(name):
+            return re.sub(r'[<>:\"/\\|?*]', '_', str(name))[:50] or ''
+
+        # Process each shot in order
+        for order, shot in enumerate(non_archived_shots, start=1):
+            shot_name = shot['name']
+            display_name = shot['display_name'] or ''
+            display_suffix = f"_{sanitize_filename(display_name)}" if include_display_in_filename and display_name else ''
+
+            # Get shot info
+            info = self.get_shot_info(shot_name)
+
+            # Images
+            if 'images' in export_type or export_type == 'all':
+                images_dir = export_dir / 'images'
+                images_dir.mkdir(exist_ok=True)
+
+                # First image
+                if info['first_image']['file']:
+                    src = Path(info['first_image']['file'])
+                    if src.exists():
+                        ext = src.suffix
+                        dst = images_dir / f"{order:03d}_{shot_name}{display_suffix}_first{ext}"
+                        shutil.copy2(src, dst)
+
+                # Last image
+                if info['last_image']['file']:
+                    src = Path(info['last_image']['file'])
+                    if src.exists():
+                        ext = src.suffix
+                        dst = images_dir / f"{order:03d}_{shot_name}{display_suffix}_last{ext}"
+                        shutil.copy2(src, dst)
+
+            # Videos
+            if 'videos' in export_type or export_type == 'all':
+                videos_dir = export_dir / 'videos'
+                videos_dir.mkdir(exist_ok=True)
+
+                if info['video']['file']:
+                    src = Path(info['video']['file'])
+                    if src.exists():
+                        ext = src.suffix
+                        dst = videos_dir / f"{order:03d}_{shot_name}{display_suffix}{ext}"
+                        shutil.copy2(src, dst)
+
+        # Generate metadata if requested
+        if include_metadata:
+            # Collect data for tables and notes
+            first_data = []
+            last_data = []
+            video_data = []
+            notes_list = []
+
+            for order, shot in enumerate(non_archived_shots, start=1):
+                shot_name = shot['name']
+                info = self.get_shot_info(shot_name)
+
+                # First Frame
+                if ('images' in export_type or export_type == 'all') and (info['first_image']['caption'] or info['first_image']['prompt']):
+                    first_data.append((order, shot_name, info['first_image']['caption'], info['first_image']['prompt']))
+
+                # Last Frame
+                if ('images' in export_type or export_type == 'all') and (info['last_image']['caption'] or info['last_image']['prompt']):
+                    last_data.append((order, shot_name, info['last_image']['caption'], info['last_image']['prompt']))
+
+                # Video
+                if ('videos' in export_type or export_type == 'all') and (info['video']['caption'] or info['video']['prompt']):
+                    video_data.append((order, shot_name, info['video']['caption'], info['video']['prompt']))
+
+                # Notes
+                if info['notes'].strip():
+                    notes_list.append((order, shot_name, info['notes']))
+
+            # Build MD content
+            md_lines = [
+                f"# Export Summary: {self.project_path.name}",
+                f"**Date:** {timestamp}",
+                f"**Type:** {export_type}",
+                ""
+            ]
+
+            # First Frame table
+            if first_data:
+                md_lines.extend([
+                    "## First Frame",
+                    "| Order | Shot Name | Captions | Prompts |",
+                    "|-------|-----------|----------|---------|"
+                ])
+                for order, name, caption, prompt in first_data:
+                    md_lines.append(f"| {order:03d} | {name} | {caption.replace('|', '\\|').replace('\n', '<br>')} | {prompt.replace('|', '\\|').replace('\n', '<br>')} |")
+                md_lines.append("")
+
+            # Last Frame table
+            if last_data:
+                md_lines.extend([
+                    "## Last Frame",
+                    "| Order | Shot Name | Captions | Prompts |",
+                    "|-------|-----------|----------|---------|"
+                ])
+                for order, name, caption, prompt in last_data:
+                    md_lines.append(f"| {order:03d} | {name} | {caption.replace('|', '\\|').replace('\n', '<br>')} | {prompt.replace('|', '\\|').replace('\n', '<br>')} |")
+                md_lines.append("")
+
+            # Video table
+            if video_data:
+                md_lines.extend([
+                    "## Video",
+                    "| Order | Shot Name | Captions | Prompts |",
+                    "|-------|-----------|----------|---------|"
+                ])
+                for order, name, caption, prompt in video_data:
+                    md_lines.append(f"| {order:03d} | {name} | {caption.replace('|', '\\|').replace('\n', '<br>')} | {prompt.replace('|', '\\|').replace('\n', '<br>')} |")
+                md_lines.append("")
+
+            # Notes table
+            if notes_list:
+                md_lines.extend([
+                    "## Notes",
+                    "| Order | Shot Name | Notes |",
+                    "|-------|-----------|-------|"
+                ])
+                for order, name, notes in notes_list:
+                    md_lines.append(f"| {order:03d} | {name} | {notes.replace('|', '\\|').replace('\n', '<br>')} |")
+                md_lines.append("")
+
+            # Write MD file
+            md_path = export_dir / "export_summary.md"
+            with open(md_path, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(md_lines))
+
+        return str(export_dir)
+
 def get_shot_manager(project_path, cache=None):
     """Retrieve a cached ``ShotManager`` for the given path."""
     from flask import current_app

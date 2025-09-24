@@ -98,6 +98,13 @@
                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
                         </button>
+                        <button class="dark-button icon-button" onclick="openExportModal()" title="Export Latest Assets" aria-label="Export Latest Assets">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
                         <button class="dark-button icon-button" onclick="openReorderModal()" title="Reorder Shots" aria-label="Reorder Shots">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 12H3"></path>
@@ -221,6 +228,41 @@
             <div class="modal-buttons">
                 <button class="green-button" onclick="saveProjectInfo()">Save</button>
                 <button class="dark-button" onclick="closeProjectInfoModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px;">Export Latest Assets</h3>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Export Name (optional)</label>
+                <input id="export-name" type="text" placeholder="Leave empty for timestamp" style="width: 100%;" />
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #b5b5b5;">Export Type</label>
+                <select id="export-type" style="width: 100%;">
+                    <option value="all">Images and Videos</option>
+                    <option value="images">Images Only</option>
+                    <option value="videos">Videos Only</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center;">
+                    <input id="include-display-in-filename" type="checkbox" checked style="margin-right: 8px;" />
+                    Include display name in filenames
+                </label>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center;">
+                    <input id="include-metadata" type="checkbox" checked style="margin-right: 8px;" />
+                    Include metadata summary (.md file)
+                </label>
+            </div>
+            <div class="modal-buttons">
+                <button class="green-button" onclick="confirmExport()">Export</button>
+                <button class="dark-button" onclick="closeExportModal()">Cancel</button>
             </div>
         </div>
     </div>
