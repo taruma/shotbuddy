@@ -134,36 +134,19 @@ def create_project():
         from app.utils import sanitize_path
         folder_path = sanitize_path(selected_folder).resolve()
 
-        project_dir = folder_path / project_name
-        project_dir.mkdir(parents=True, exist_ok=True)
-        shots_dir = project_dir / "shots"
-        shots_dir.mkdir(exist_ok=True)
-        (shots_dir / "wip").mkdir(parents=True, exist_ok=True)
-        (shots_dir / "latest_images").mkdir(exist_ok=True)
-        (shots_dir / "latest_videos").mkdir(exist_ok=True)
-        (project_dir / "_legacy").mkdir(exist_ok=True)
+        # Create project via service (this handles recents correctly)
+        project_info_obj = project_manager.create_project(folder_path, project_name)
 
-        resolved_dir = project_dir.resolve()
-        
-        # Create project information file
-        project_info = project_manager.create_project_info(resolved_dir, project_name)
+        # Load project info for frontend (includes title, description, etc.)
+        project_info = project_manager.load_project_info(project_info_obj["path"])
 
         project_data = {
             "name": project_name,
-            "path": str(resolved_dir),
-            "created": datetime.now().isoformat(),
+            "path": project_info_obj["path"],
+            "created": project_info_obj["created"],
             "info": project_info,
             "shots": []
         }
-
-        # Defensive state update
-        path_str = str(resolved_dir)
-        project_manager.projects['current_project'] = path_str
-        project_manager.projects['recent_projects'] = [path_str]
-        project_manager.save_projects()
-
-        # Optional: sanity check (useful in dev)
-        assert project_manager.get_current_project() is not None
 
         return jsonify({"success": True, "data": project_data})
     except Exception as e:
