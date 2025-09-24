@@ -1782,7 +1782,9 @@ async function openProjectInfoModal() {
         if (result.success) {
             // Populate the modal with project info
             document.getElementById('project-info-title').value = result.data.title || '';
-            document.getElementById('project-info-description').value = result.data.description || '';
+            document.getElementById('project-info-short-description').value = result.data.short_description || '';
+            document.getElementById('project-info-version').value = result.data.version || '1.0.0';
+            document.getElementById('project-info-notes').value = result.data.notes || result.data.description || '';
             document.getElementById('project-info-tags').value = result.data.tags ? result.data.tags.join(', ') : '';
             document.getElementById('project-info-created').value = result.data.created ? new Date(result.data.created).toLocaleString() : '';
             document.getElementById('project-info-updated').value = result.data.updated ? new Date(result.data.updated).toLocaleString() : '';
@@ -1807,18 +1809,22 @@ function closeProjectInfoModal() {
 
 async function saveProjectInfo() {
     const title = document.getElementById('project-info-title').value.trim();
-    const description = document.getElementById('project-info-description').value.trim();
+    const short_description = document.getElementById('project-info-short-description').value.trim();
+    const version = document.getElementById('project-info-version').value.trim();
+    const notes = document.getElementById('project-info-notes').value.trim();
     const tagsInput = document.getElementById('project-info-tags').value.trim();
-    
+
     // Parse tags (split by comma and trim whitespace)
-    const tags = tagsInput ? 
-        tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+    const tags = tagsInput ?
+        tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
-    
+
     // Prepare project info object
     const projectInfo = {
         title: title || (currentProject && typeof currentProject === 'object' && currentProject.name ? currentProject.name : 'Untitled Project'), // Use project name as default title if none provided
-        description: description,
+        short_description: short_description,
+        version: version || '1.0.0',
+        notes: notes,
         tags: tags
     };
     

@@ -65,6 +65,8 @@ class ProjectManager:
         project_info = {
             'title': project_name,
             'description': '',
+            'short_description': '',
+            'notes': '',
             'tags': [],
             'created': datetime.now().isoformat(),
             'updated': datetime.now().isoformat(),
@@ -91,6 +93,8 @@ class ProjectManager:
                     defaults = {
                         'title': project_path.name,
                         'description': '',
+                        'short_description': '',
+                        'notes': '',
                         'tags': [],
                         'created': datetime.now().isoformat(),
                         'updated': datetime.now().isoformat(),
@@ -99,6 +103,9 @@ class ProjectManager:
                     for key, value in defaults.items():
                         if key not in project_info:
                             project_info[key] = value
+                    # For backward compatibility, if notes is empty but description exists, use description as notes
+                    if not project_info.get('notes') and project_info.get('description'):
+                        project_info['notes'] = project_info['description']
                     return project_info
             except Exception as e:
                 logger.error("Failed to load project info: %s", e)
@@ -106,6 +113,8 @@ class ProjectManager:
                 return {
                     'title': project_path.name,
                     'description': '',
+                    'short_description': '',
+                    'notes': '',
                     'tags': [],
                     'created': datetime.now().isoformat(),
                     'updated': datetime.now().isoformat(),
@@ -128,6 +137,8 @@ class ProjectManager:
         defaults = {
             'title': project_path.name,
             'description': '',
+            'short_description': '',
+            'notes': '',
             'tags': [],
             'created': datetime.now().isoformat(),
             'updated': datetime.now().isoformat(),
@@ -136,6 +147,9 @@ class ProjectManager:
         for key, value in defaults.items():
             if key not in info_data:
                 info_data[key] = value
+
+        # Mirror description to notes for backward compatibility
+        info_data['description'] = info_data.get('notes', '')
 
         # Write to file
         with open(project_info_path, 'w', encoding='utf-8') as f:
@@ -161,6 +175,8 @@ class ProjectManager:
                     project_info = {
                         'title': project_path.name,
                         'description': '',
+                        'short_description': '',
+                        'notes': '',
                         'tags': [],
                         'created': datetime.now().isoformat(),
                         'updated': datetime.now().isoformat(),
@@ -171,6 +187,8 @@ class ProjectManager:
                 project_info = {
                     'title': project_path.name,
                     'description': '',
+                    'short_description': '',
+                    'notes': '',
                     'tags': [],
                     'created': datetime.now().isoformat(),
                     'updated': datetime.now().isoformat(),
