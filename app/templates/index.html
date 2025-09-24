@@ -83,9 +83,10 @@
                 <div class="container">
                     <h1 class="project-title" id="project-title">Loading...</h1>
                     <div class="header-controls">
-                        <button class="dark-button icon-button" onclick="openShotsFolder()"\ title="Open Project Shots Folder">
+                        <button class="dark-button icon-button" onclick="openShotsFolder()" title="Open Project Shots Folder">
                             <img src="{{ url_for('static', filename='icons/folder_24.png') }}" alt="Open Project Shots Folder" />
                         </button>
+                        <button class="dark-button icon-button" onclick="showSetupScreen()" title="Back to Menu" aria-label="Back to Menu">🏠</button>
                         <button class="dark-button icon-button" onclick="openProjectInfoModal()" title="Project Information" aria-label="Project Information">ℹ️</button>
                         <button class="dark-button" onclick="openReorderModal()">Reorder</button>
                         <button class="green-button" onclick="addNewShot()">New Shot +</button>
