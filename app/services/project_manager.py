@@ -120,10 +120,10 @@ class ProjectManager:
         # Convert to Path object if it's a string
         project_path = Path(project_path)
         project_info_path = self.get_project_info_file_path(project_path)
-        
+
         # Add/update the 'updated' timestamp
         info_data['updated'] = datetime.now().isoformat()
-        
+
         # Ensure all required fields are present
         defaults = {
             'title': project_path.name,
@@ -136,12 +136,58 @@ class ProjectManager:
         for key, value in defaults.items():
             if key not in info_data:
                 info_data[key] = value
-        
+
         # Write to file
         with open(project_info_path, 'w', encoding='utf-8') as f:
             json.dump(info_data, f, indent=2, ensure_ascii=False)
-        
+
         return info_data
+
+    def update_project_timestamp(self, project_path):
+        """Update only the 'updated' timestamp for a project. Best-effort operation."""
+        try:
+            # Convert to Path object if it's a string
+            project_path = Path(project_path)
+            project_info_path = self.get_project_info_file_path(project_path)
+
+            # Load existing project info or create defaults
+            if project_info_path.exists():
+                try:
+                    with open(project_info_path, 'r', encoding='utf-8') as f:
+                        project_info = json.load(f)
+                except Exception as e:
+                    logger.warning("Failed to load existing project info for timestamp update: %s", e)
+                    # Create default structure
+                    project_info = {
+                        'title': project_path.name,
+                        'description': '',
+                        'tags': [],
+                        'created': datetime.now().isoformat(),
+                        'updated': datetime.now().isoformat(),
+                        'version': '1.0.0'
+                    }
+            else:
+                # Create default structure
+                project_info = {
+                    'title': project_path.name,
+                    'description': '',
+                    'tags': [],
+                    'created': datetime.now().isoformat(),
+                    'updated': datetime.now().isoformat(),
+                    'version': '1.0.0'
+                }
+
+            # Update only the timestamp
+            project_info['updated'] = datetime.now().isoformat()
+
+            # Write back to file
+            with open(project_info_path, 'w', encoding='utf-8') as f:
+                json.dump(project_info, f, indent=2, ensure_ascii=False)
+
+            logger.debug("Updated project timestamp for: %s", project_path)
+        except Exception as e:
+            logger.warning("Failed to update project timestamp for %s: %s", project_path, e)
+            # Don't raise - timestamp updates are best-effort
 
     def create_project(self, project_path, project_name):
         from app.utils import sanitize_path

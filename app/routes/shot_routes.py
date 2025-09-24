@@ -40,6 +40,9 @@ def create_shot():
         shot_manager.create_shot_structure(shot_name)
         shot_info = shot_manager.get_shot_info(shot_name)
 
+        # Update project timestamp after successful shot creation
+        project_manager.update_project_timestamp(project["path"])
+
         return jsonify({"success": True, "data": shot_info})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -63,6 +66,9 @@ def upload_file():
 
         file_handler = FileHandler(project['path'])
         result = file_handler.save_file(file, shot_name, file_type)
+
+        # Update project timestamp after successful file upload
+        project_manager.update_project_timestamp(project["path"])
 
         return jsonify({"success": True, "data": result})
     except ValueError as e:
@@ -88,6 +94,9 @@ def save_shot_notes():
         shot_manager = get_shot_manager(project["path"])
         shot_manager.save_shot_notes(shot_name, notes)
 
+        # Update project timestamp after successful notes save
+        project_manager.update_project_timestamp(project["path"])
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -110,6 +119,9 @@ def save_caption():
 
         shot_manager = get_shot_manager(project["path"])
         shot_manager.save_caption(shot_name, asset_type, caption)
+
+        # Update project timestamp after successful caption save
+        project_manager.update_project_timestamp(project["path"])
 
         return jsonify({"success": True})
     except ValueError as e:
@@ -136,6 +148,9 @@ def save_shot_prompt():
 
         shot_manager = get_shot_manager(project["path"])
         shot_manager.save_prompt(shot_name, asset_type, int(version), prompt)
+
+        # Update project timestamp after successful prompt save
+        project_manager.update_project_timestamp(project["path"])
 
         return jsonify({"success": True})
     except Exception as e:
@@ -200,6 +215,9 @@ def rename_shot():
         shot_manager = get_shot_manager(project["path"])
         shot_info = shot_manager.rename_shot(old_name, new_name)
 
+        # Update project timestamp after successful shot rename
+        project_manager.update_project_timestamp(project["path"])
+
         return jsonify({"success": True, "data": shot_info})
     except ValueError as e:
         return jsonify({"success": False, "error": str(e)}), 400
@@ -223,6 +241,9 @@ def reorder_shots():
         shot_manager = get_shot_manager(project["path"])
         shot_manager.save_shot_order(shot_order)
 
+        # Update project timestamp after successful shot reorder
+        project_manager.update_project_timestamp(project["path"])
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -240,6 +261,9 @@ def create_shot_between():
 
         shot_manager = get_shot_manager(project["path"])
         shot_info = shot_manager.create_shot_between(after_shot)
+
+        # Update project timestamp after successful shot creation
+        project_manager.update_project_timestamp(project["path"])
 
         return jsonify({"success": True, "data": shot_info})
     except ValueError as e:
@@ -352,6 +376,9 @@ def promote_asset():
         shot_manager.promote_asset(shot_name, asset_type, int(version))
         shot_info = shot_manager.get_shot_info(shot_name)
 
+        # Update project timestamp after successful asset promotion
+        project_manager.update_project_timestamp(project["path"])
+
         return jsonify({"success": True, "data": shot_info})
     except ValueError as e:
         return jsonify({"success": False, "error": str(e)}), 400
@@ -375,6 +402,9 @@ def archive_shot():
 
         shot_manager = get_shot_manager(project["path"])
         shot_info = shot_manager.archive_shot(shot_name, bool(archived))
+
+        # Update project timestamp after successful archive toggle
+        project_manager.update_project_timestamp(project["path"])
 
         return jsonify({"success": True, "data": shot_info})
     except ValueError as e:
@@ -435,6 +465,9 @@ def set_display_name():
 
         shot_manager.save_display_name(shot_name, display_name)
         updated_info = shot_manager.get_shot_info(shot_name)
+
+        # Update project timestamp after successful display name save
+        project_manager.update_project_timestamp(project["path"])
 
         return jsonify({"success": True, "data": updated_info})
     except ValueError as e:
