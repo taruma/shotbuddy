@@ -212,40 +212,74 @@ def get_last_project_location():
 def browse_folder():
     """Open a native folder picker dialog and return the selected path"""
     try:
+        # Debug/test hooks (for testing fallback behavior on any OS)
+        force_path = request.args.get("force_path")
+        if force_path:
+            return jsonify({"success": True, "data": {"path": force_path}})
+        if request.args.get("force_warning") == "1":
+            import os
+            home_dir = os.path.expanduser("~")
+            return jsonify({
+                "success": True,
+                "data": {"path": home_dir},
+                "warning": "Native folder dialog not available. Defaulted to your home directory. You can manually edit the path."
+            })
+        if request.args.get("force_error") == "1":
+            return jsonify({"success": False, "error": "Forced test error"}), 400
+
         # Try to use tkinter for native folder dialog first
         try:
             from tkinter import Tk
             from tkinter import filedialog
-            
+
             # Create and hide the root window
             root = Tk()
             root.withdraw()
             root.attributes('-topmost', True)  # Bring dialog to front
-            
+
             # Open folder dialog
             folder_path = filedialog.askdirectory(title="Select Project Folder")
             root.destroy()
-            
+
             if not folder_path:
                 return jsonify({"success": False, "error": "No folder selected"}), 400
-                
+
             return jsonify({"success": True, "data": {"path": folder_path}})
-            
+
         except ImportError:
             logger.info("Tkinter not available, trying alternative methods")
         except Exception as e:
             logger.warning("Tkinter failed: %s", e)
+
+        # macOS fallback: AppleScript NSOpenPanel
+        try:
+            if sys.platform == "darwin":
+                import subprocess
+                script = 'POSIX path of (choose folder with prompt "Select Project Folder")'
+                result = subprocess.run(
+                    ["osascript", "-e", script],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                folder_path = result.stdout.strip()
+                if folder_path:
+                    return jsonify({"success": True, "data": {"path": folder_path}})
+                else:
+                    return jsonify({"success": False, "error": "No folder selected"}), 400
+        except Exception as e:
+            logger.warning("AppleScript folder picker failed: %s", e)
 
         # Fallback: Return the user's home directory as a starting point
         # This allows the UI to show a sensible default and let the user manually edit the path
         import os
         home_dir = os.path.expanduser("~")
         return jsonify({
-            "success": True, 
+            "success": True,
             "data": {"path": home_dir},
-            "warning": "Native folder dialog not available. Please manually edit the path or use the manual input fallback."
+            "warning": "Native folder dialog not available. Defaulted to your home directory. You can manually edit the path."
         })
-        
+
     except Exception as e:
         logger.error("Error in browse_folder: %s", e)
         return jsonify({"success": False, "error": f"Failed to open folder dialog: {str(e)}"}), 500
