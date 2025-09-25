@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.1.0 (September 25, 2025) - by Taruma Sakti
+
+This minor release introduces enhancements for project management and macOS compatibility.
+
+### Added
+- **Project Created Timestamp Preservation**: Implemented functionality to preserve and backfill project creation timestamps using folder ctime (fix #1).
+- **macOS Folder Browser Support**: Enhanced folder browser with macOS support and debug hooks (fix #2).
+
+### AI Development Attribution
+This release was developed with AI assistance using various tools including Qwen Code, GPT-5, Grok Code Fast 1, and Code Supernova, with primary workflow using Qwen Code initial development followed by refinement through Cline with GPT-5 and Code Supernova. All generated changes were manually reviewed, tested, and refined by the maintainer, Taruma Sakti, to ensure quality and alignment with project goals.
+
 ## v3.0.0 (September 24, 2025) - by Taruma Sakti
 
 This major release introduces comprehensive project information management, enhanced export capabilities, UI/UX refinements including improved theming, and performance optimizations. All changes maintain backward compatibility while modernizing the application for professional AI filmmaking workflows.

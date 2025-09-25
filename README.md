@@ -88,7 +88,7 @@ Notes on individual shots can be made easily.
 
 ![Shotbuddy_04](https://github.com/user-attachments/assets/7567416e-3f4b-42d0-888c-b8296b261616)
 
-### New Features in this Fork (v2.0.0 to v3.0.0)
+### New Features in this Fork (v2.0.0 to v3.1.0)
 
 <img width="347" height="103" alt="image" src="https://github.com/user-attachments/assets/a5b04523-d584-4958-9e13-8d95eb99aefd" />
 
