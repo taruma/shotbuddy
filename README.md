@@ -25,36 +25,122 @@ The application automatically manages the latest versions in `latest_images` and
 
 ## Installation
 
-Using uv
+You can install Shotbuddy using either `uv` (recommended for speed and efficiency) or `venv` with `pip`. Both methods involve cloning the repository with a shallow clone to minimize download size.
 
-1. Install uv
+### Method 1: Using uv (Recommended)
 
-   See https://docs.astral.sh/uv/
+1.  **Install uv**
 
-4. Clone the repository
+    See https://docs.astral.sh/uv/
 
-   ```bash
-   git clone https://github.com/taruma/shotbuddy.git
-   ```
-   ```bash
-   cd shotbuddy
-   ```
+2.  **Clone the repository (shallow clone for smaller download)**
 
-5. Create the environment and install dependencies
+    ```bash
+    git clone --depth 1 https://github.com/taruma/shotbuddy.git
+    cd shotbuddy
+    ```
+    *Note: A shallow clone can still be updated later using `git pull` to get the latest changes from the main branch.*
 
-   ```bash
-   uv sync
-   ```
+3.  **Create the environment and install dependencies**
 
-6. Run the development server
+    ```bash
+    uv sync
+    ```
 
-   ```bash
-   uv run run.py
-   ```
+4.  **Run the development server**
 
-7. Open your browser
+    ```bash
+    uv run run.py
+    ```
+    *To terminate the application, press `Ctrl+C` (or `Cmd+C` on macOS) in the terminal.*
 
-   By default, Shotbuddy will be available at http://127.0.0.1:5001/
+### Method 2: Using venv and pip
+
+1.  **Clone the repository (shallow clone for smaller download)**
+
+    ```bash
+    git clone --depth 1 https://github.com/taruma/shotbuddy.git
+    cd shotbuddy
+    ```
+    *Note: A shallow clone can still be updated later using `git pull` to get the latest changes from the main branch.*
+
+2.  **Create a virtual environment**
+
+    ```bash
+    python -m venv .venv
+    ```
+
+3.  **Activate the virtual environment**
+
+    *   **On Windows:**
+        ```bash
+        .venv\Scripts\activate
+        ```
+    *   **On macOS/Linux:**
+        ```bash
+        source .venv/bin/activate
+        ```
+
+4.  **Install dependencies**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+5.  **Run the development server**
+
+    ```bash
+    python run.py
+    ```
+    *To terminate the application, press `Ctrl+C` (or `Cmd+C` on macOS) in the terminal.*
+
+6.  **Deactivate the virtual environment (when done)**
+
+    ```bash
+    deactivate
+    ```
+
+### Open your browser
+
+By default, Shotbuddy will be available at http://127.0.0.1:5001/
+
+## Updating Shotbuddy
+
+To update your Shotbuddy installation to the latest version:
+
+1.  **Navigate to the project directory**
+
+    ```bash
+    cd shotbuddy # Or wherever you cloned the repository
+    ```
+
+2.  **Pull the latest changes from the repository**
+
+    ```bash
+    git pull
+    ```
+
+3.  **Update dependencies (if necessary)**
+
+    *   **Using `uv`:**
+        ```bash
+        uv sync
+        ```
+    *   **Using `venv` and `pip`:**
+        ```bash
+        # Activate your virtual environment if not already active
+        # On Windows: .venv\Scripts\activate
+        # On macOS/Linux: source .venv/bin/activate
+        pip install -r requirements.txt
+        ```
+
+4.  **Run the development server**
+
+    ```bash
+    uv run run.py # If using uv
+    # OR
+    python run.py # If using venv and pip
+    ```
 
 ## Functionality
 Shotbuddy has a straightforward interface, similar to existing shotlist applications, but optimized for AI filmmakers.
