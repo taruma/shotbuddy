@@ -99,7 +99,7 @@ class ProjectManager:
         # Convert to Path object if it's a string
         project_path = Path(project_path)
         project_info_path = self.get_project_info_file_path(project_path)
-        
+
         if project_info_path.exists():
             try:
                 with open(project_info_path, 'r', encoding='utf-8') as f:
@@ -111,10 +111,16 @@ class ProjectManager:
                         'short_description': '',
                         'notes': '',
                         'tags': [],
-                        'created': datetime.now().isoformat(),
                         'updated': datetime.now().isoformat(),
                         'version': '1.0.0'
                     }
+                    # Set created from folder ctime if missing, and persist it
+                    created_default = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
+                    if 'created' not in project_info:
+                        project_info['created'] = created_default
+                        # Persist the backfilled created timestamp
+                        with open(project_info_path, 'w', encoding='utf-8') as fw:
+                            json.dump(project_info, fw, indent=2, ensure_ascii=False)
                     for key, value in defaults.items():
                         if key not in project_info:
                             project_info[key] = value
@@ -124,14 +130,15 @@ class ProjectManager:
                     return project_info
             except Exception as e:
                 logger.error("Failed to load project info: %s", e)
-                # Return default project info if loading fails
+                # Return default project info if loading fails, using folder ctime for created
+                created_default = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
                 return {
                     'title': project_path.name,
                     'description': '',
                     'short_description': '',
                     'notes': '',
                     'tags': [],
-                    'created': datetime.now().isoformat(),
+                    'created': created_default,
                     'updated': datetime.now().isoformat(),
                     'version': '1.0.0'
                 }
@@ -145,8 +152,39 @@ class ProjectManager:
         project_path = Path(project_path)
         project_info_path = self.get_project_info_file_path(project_path)
 
-        # Add/update the 'updated' timestamp
-        info_data['updated'] = datetime.now().isoformat()
+        # Load existing project info to preserve created timestamp
+        existing_info = {}
+        if project_info_path.exists():
+            try:
+                with open(project_info_path, 'r', encoding='utf-8') as f:
+                    existing_info = json.load(f)
+            except Exception as e:
+                logger.warning("Failed to load existing project info for save: %s", e)
+                # If loading fails, create defaults with created from folder ctime
+                created_default = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
+                existing_info = {
+                    'title': project_path.name,
+                    'description': '',
+                    'short_description': '',
+                    'notes': '',
+                    'tags': [],
+                    'created': created_default,
+                    'updated': datetime.now().isoformat(),
+                    'version': '1.0.0'
+                }
+
+        # Merge incoming data into existing, but preserve created
+        merged_info = existing_info.copy()
+        for key, value in info_data.items():
+            merged_info[key] = value
+
+        # Ensure created is never overwritten
+        if 'created' not in merged_info:
+            created_default = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
+            merged_info['created'] = created_default
+
+        # Always update the 'updated' timestamp
+        merged_info['updated'] = datetime.now().isoformat()
 
         # Ensure all required fields are present
         defaults = {
@@ -155,22 +193,20 @@ class ProjectManager:
             'short_description': '',
             'notes': '',
             'tags': [],
-            'created': datetime.now().isoformat(),
-            'updated': datetime.now().isoformat(),
             'version': '1.0.0'
         }
         for key, value in defaults.items():
-            if key not in info_data:
-                info_data[key] = value
+            if key not in merged_info:
+                merged_info[key] = value
 
         # Mirror description to notes for backward compatibility
-        info_data['description'] = info_data.get('notes', '')
+        merged_info['description'] = merged_info.get('notes', '')
 
         # Write to file
         with open(project_info_path, 'w', encoding='utf-8') as f:
-            json.dump(info_data, f, indent=2, ensure_ascii=False)
+            json.dump(merged_info, f, indent=2, ensure_ascii=False)
 
-        return info_data
+        return merged_info
 
     def update_project_timestamp(self, project_path):
         """Update only the 'updated' timestamp for a project. Best-effort operation."""
@@ -186,26 +222,28 @@ class ProjectManager:
                         project_info = json.load(f)
                 except Exception as e:
                     logger.warning("Failed to load existing project info for timestamp update: %s", e)
-                    # Create default structure
+                    # Create default structure with created from folder ctime
+                    created_default = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
                     project_info = {
                         'title': project_path.name,
                         'description': '',
                         'short_description': '',
                         'notes': '',
                         'tags': [],
-                        'created': datetime.now().isoformat(),
+                        'created': created_default,
                         'updated': datetime.now().isoformat(),
                         'version': '1.0.0'
                     }
             else:
-                # Create default structure
+                # Create default structure with created from folder ctime
+                created_default = datetime.fromtimestamp(project_path.stat().st_ctime).isoformat()
                 project_info = {
                     'title': project_path.name,
                     'description': '',
                     'short_description': '',
                     'notes': '',
                     'tags': [],
-                    'created': datetime.now().isoformat(),
+                    'created': created_default,
                     'updated': datetime.now().isoformat(),
                     'version': '1.0.0'
                 }
