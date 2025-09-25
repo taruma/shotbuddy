@@ -41,10 +41,10 @@
             try {
                 const response = await fetch('/api/system/browse-folder');
                 const result = await response.json();
-                
+
                 if (result.success) {
                     if (result.warning) {
-                        showNotification(result.warning, 'error');
+                        showNotification(result.warning, 'warning');
                         // Show manual path fallback when native dialog isn't available
                         toggleManualPath();
                     }
@@ -167,12 +167,12 @@
 
         async function openCreateProjectModal() {
             document.getElementById('new-project-name').value = '';
-            
+
             // Get the last project location and set it as default
             try {
                 const response = await fetch('/api/project/last-location');
                 const result = await response.json();
-                
+
                 if (result.success && result.data.path) {
                     document.getElementById('new-project-location').value = result.data.path;
                 } else {
@@ -182,9 +182,26 @@
                 console.error('Error fetching last project location:', error);
                 document.getElementById('new-project-location').value = '';
             }
-            
+
             document.getElementById('create-project-modal').style.display = 'flex';
             document.getElementById('new-project-name').focus();
+
+            // Add Enter key listeners for better UX
+            const nameInput = document.getElementById('new-project-name');
+            const locationInput = document.getElementById('new-project-location');
+
+            const handleEnter = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmCreateProject();
+                    // Remove listeners after use
+                    nameInput.removeEventListener('keydown', handleEnter);
+                    locationInput.removeEventListener('keydown', handleEnter);
+                }
+            };
+
+            nameInput.addEventListener('keydown', handleEnter);
+            locationInput.addEventListener('keydown', handleEnter);
         }
 
         function closeCreateProjectModal() {
