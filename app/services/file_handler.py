@@ -1,17 +1,17 @@
-from pathlib import Path
+import logging
 import shutil
+from pathlib import Path
+
 from PIL import Image
 
-from app.services.prompt_importer import extract_prompt_from_png
-import logging
-
-from app.services.shot_manager import get_shot_manager
 from app.config.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
     ALLOWED_VIDEO_EXTENSIONS,
     THUMBNAIL_SIZE,
     get_project_thumbnail_cache_dir,
 )
+from app.services.prompt_importer import extract_prompt_from_png
+from app.services.shot_manager import get_shot_manager
 
 logger = logging.getLogger(__name__)
 
@@ -220,10 +220,13 @@ class FileHandler:
     def create_video_thumbnail(self, video_path, shot_name, size=THUMBNAIL_SIZE):
         """Extract the first frame of ``video_path`` and save it as a thumbnail."""
         try:
-            import subprocess
             import shutil as _shutil
+            import subprocess
 
             video_path = Path(video_path)
+            if not video_path.exists():
+                logger.warning("Video file does not exist: %s", video_path)
+                return None
             thumb_filename = f"{shot_name}_{video_path.stem}_vthumb.jpg"
             thumb_path = self.thumbnail_cache_dir / thumb_filename
 
@@ -236,7 +239,7 @@ class FileHandler:
             tmp_path = thumb_path.with_suffix(".tmp.jpg")
 
             cmd = [ffmpeg, "-y", "-i", str(video_path), "-frames:v", "1", str(tmp_path)]
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=False)  # noqa: S603
 
             with Image.open(tmp_path) as img:
                 img.thumbnail(size, Image.Resampling.LANCZOS)

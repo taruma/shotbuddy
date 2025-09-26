@@ -1,8 +1,9 @@
-from pathlib import Path
-from PIL import Image
+import json
 import logging
 import re
-import json
+from pathlib import Path
+
+from PIL import Image
 
 from app.config.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
@@ -10,7 +11,6 @@ from app.config.constants import (
     THUMBNAIL_SIZE,
     get_project_thumbnail_cache_dir,
 )
-
 from app.services.project_manager import ProjectManager
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ def load_meta(shot_name):
                 if isinstance(data, dict):
                     return data
     except Exception:
-        pass
+        logger.exception("Error loading shot meta")
     return {}
 
 
@@ -104,7 +104,7 @@ class ShotManager:
                     if isinstance(data, list):
                         return set(data)
         except Exception:
-            pass
+            logger.exception("Error loading archived shots")
         return set()
 
     def _save_archived(self, names: set):
@@ -218,7 +218,7 @@ class ShotManager:
                 names.add(new_name)
                 self._save_archived(names)
         except Exception:
-            pass
+            logger.exception("Error updating archived state during rename")
 
         return self.get_shot_info(new_name)
 
@@ -389,7 +389,7 @@ class ShotManager:
                         if isinstance(data, dict):
                             return data
             except Exception:
-                pass
+                logger.exception("Error loading project meta")
         # Fallback to app-level meta (for legacy data)
         return load_meta(shot_name)
 
@@ -417,10 +417,10 @@ class ShotManager:
         notes_file = shot_dir / 'notes.txt'
         if notes_file.exists():
             try:
-                with open(notes_file, 'r', encoding='utf-8') as f:
+                with open(notes_file, encoding='utf-8') as f:
                     notes = f.read().strip()
             except Exception:
-                pass
+                logger.exception("Error loading shot notes")
 
 
         # First/Last images
@@ -592,7 +592,7 @@ class ShotManager:
                     if 1 <= v <= max_version:
                         return v
             except Exception:
-                pass
+                logger.exception("Error reading version marker")
             return None
 
         marker = self._version_marker_path(asset_type, shot_name)
@@ -655,7 +655,7 @@ class ShotManager:
                 try:
                     existing.unlink()
                 except Exception:
-                    pass
+                    logger.exception("Error unlinking existing final image")
 
             final_path = final_dir / f"{shot_name}_{slot}{src.suffix}"
             _shutil.copy2(str(src), str(final_path))
@@ -669,7 +669,7 @@ class ShotManager:
                 if old_thumb.exists():
                     old_thumb.unlink()
             except Exception:
-                pass
+                logger.exception("Error unlinking old image thumbnail")
 
             _ = self.get_thumbnail_path(final_path, shot_name)
             return self._normalize_path(final_path)
@@ -695,7 +695,7 @@ class ShotManager:
             try:
                 existing.unlink()
             except Exception:
-                pass
+                logger.exception("Error unlinking existing final video")
 
         final_path = final_dir / f"{shot_name}{src.suffix}"
         _shutil.copy2(str(src), str(final_path))
@@ -708,7 +708,7 @@ class ShotManager:
             if old_thumb.exists():
                 old_thumb.unlink()
         except Exception:
-            pass
+            logger.exception("Error unlinking old video thumbnail")
 
         _ = self.get_video_thumbnail_path(final_path, shot_name)
         return self._normalize_path(final_path)
@@ -743,7 +743,7 @@ class ShotManager:
                     if isinstance(data, dict):
                         return data
         except Exception:
-            pass
+            logger.exception("Error loading shot captions")
         return {}
 
     def save_caption(self, shot_name, asset_type, caption):
@@ -789,7 +789,7 @@ class ShotManager:
         path = self._prompt_file_path(shot_name, asset_type, version)
         if path.exists():
             try:
-                with open(path, 'r', encoding='utf-8') as f:
+                with open(path, encoding='utf-8') as f:
                     return f.read().strip()
             except Exception:
                 return ''
@@ -798,7 +798,7 @@ class ShotManager:
             legacy_path = self._prompt_file_path(shot_name, 'image', version)
             if legacy_path.exists():
                 try:
-                    with open(legacy_path, 'r', encoding='utf-8') as f:
+                    with open(legacy_path, encoding='utf-8') as f:
                         return f.read().strip()
                 except Exception:
                     return ''
@@ -867,7 +867,7 @@ class ShotManager:
             if thumb_path.exists() and thumb_path.stat().st_mtime >= image_path.stat().st_mtime:
                 return f"/api/shots/thumbnail/{thumb_filename}"
         except Exception:
-            pass
+            logger.exception("Error checking thumbnail timestamp")
         try:
             self.thumbnail_cache_dir.mkdir(parents=True, exist_ok=True)
             with Image.open(image_path) as img:
@@ -890,10 +890,13 @@ class ShotManager:
         if not video_path:
             return None
 
-        import subprocess
         import shutil as _shutil
+        import subprocess
 
         video_path = Path(video_path)
+        if not video_path.exists():
+            logger.warning("Video file does not exist: %s", video_path)
+            return None
         thumb_filename = f"{shot_name}_{video_path.stem}_vthumb.jpg"
         thumb_path = self.thumbnail_cache_dir / thumb_filename
 
@@ -908,7 +911,7 @@ class ShotManager:
                 self.thumbnail_cache_dir.mkdir(parents=True, exist_ok=True)
                 tmp_path = thumb_path.with_suffix(".tmp.jpg")
                 cmd = [ffmpeg, "-y", "-i", str(video_path), "-frames:v", "1", str(tmp_path)]
-                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=False)  # noqa: S603
                 with Image.open(tmp_path) as img:
                     img.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
                     if img.mode in ("RGBA", "LA", "P"):
@@ -927,9 +930,9 @@ class ShotManager:
 
     def export_latest_assets(self, export_name=None, export_type='all', include_display_in_filename=True, include_metadata=True):
         """Export latest assets for non-archived shots in custom order."""
+        import re
         import shutil
         from datetime import datetime
-        import re
 
         # Get non-archived shots in order
         non_archived_shots = [s for s in self.get_shots() if not s['archived']]

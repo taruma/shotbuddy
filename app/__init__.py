@@ -1,7 +1,10 @@
+import logging
+
 from flask import Flask
 from flask_cors import CORS
+
 from app.services.project_manager import ProjectManager
-import logging
+
 
 def create_app():
     app = Flask(__name__)

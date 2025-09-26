@@ -1,13 +1,14 @@
-from flask import Blueprint, request, jsonify, send_file, current_app
-from app.services.shot_manager import get_shot_manager
-from pathlib import Path
-from app.config.constants import get_project_thumbnail_cache_dir
-from datetime import datetime
-
-from app.services.file_handler import FileHandler
-
-import subprocess
 import platform
+import shutil
+import subprocess
+from datetime import datetime
+from pathlib import Path
+
+from flask import Blueprint, current_app, jsonify, request, send_file
+
+from app.config.constants import get_project_thumbnail_cache_dir
+from app.services.file_handler import FileHandler
+from app.services.shot_manager import get_shot_manager
 
 shot_bp = Blueprint('shot', __name__)
 
@@ -320,11 +321,23 @@ def reveal_file():
             return jsonify({"success": False, "error": f"File does not exist: {file_path}"}), 404
 
         if platform.system() == "Windows":
-            subprocess.Popen(['explorer', '/select,', str(file_path)])
+            explorer_path = shutil.which("explorer")
+            if explorer_path:
+                subprocess.Popen([explorer_path, '/select,', str(file_path)], shell=False)  # noqa: S603
+            else:
+                raise FileNotFoundError("explorer not found")
         elif platform.system() == "Darwin":
-            subprocess.Popen(['open', '-R', str(file_path)])
+            open_path = shutil.which("open")
+            if open_path:
+                subprocess.Popen([open_path, '-R', str(file_path)], shell=False)  # noqa: S603
+            else:
+                raise FileNotFoundError("open not found")
         else:
-            subprocess.Popen(['xdg-open', str(file_path.parent)])
+            xdg_path = shutil.which("xdg-open")
+            if xdg_path:
+                subprocess.Popen([xdg_path, str(file_path.parent)], shell=False)  # noqa: S603
+            else:
+                raise FileNotFoundError("xdg-open not found")
 
         return jsonify({"success": True})
     except Exception as e:
@@ -345,11 +358,23 @@ def open_shots_folder():
             return jsonify({"success": False, "error": "Shots folder missing"}), 404
 
         if platform.system() == "Windows":
-            subprocess.Popen(["explorer", str(shots_path)])
+            explorer_path = shutil.which("explorer")
+            if explorer_path:
+                subprocess.Popen([explorer_path, str(shots_path)], shell=False)  # noqa: S603
+            else:
+                raise FileNotFoundError("explorer not found")
         elif platform.system() == "Darwin":
-            subprocess.Popen(["open", str(shots_path)])
+            open_path = shutil.which("open")
+            if open_path:
+                subprocess.Popen([open_path, str(shots_path)], shell=False)  # noqa: S603
+            else:
+                raise FileNotFoundError("open not found")
         else:
-            subprocess.Popen(["xdg-open", str(shots_path)])
+            xdg_path = shutil.which("xdg-open")
+            if xdg_path:
+                subprocess.Popen([xdg_path, str(shots_path)], shell=False)  # noqa: S603
+            else:
+                raise FileNotFoundError("xdg-open not found")
 
         return jsonify({"success": True})
     except Exception as e:

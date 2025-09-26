@@ -34,7 +34,9 @@ dev = [
 ]
 
 [tool.ruff]
-line-length = 88
-select = ["E", "F", "I", "UP", "S"]  # Style, Pyflakes, isort, pyupgrade, security
-ignore = ["E501"]  # Ignore line length for now
+line-length = 120
 target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "S"]  # Style, Pyflakes, isort, pyupgrade, security
+ignore = ["E501", "S603"]  # Ignore line length and subprocess untrusted input for trusted calls
