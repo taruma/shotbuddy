@@ -1014,33 +1014,96 @@
             await uploadFile(file, shotName, expectedType);
         }
 
-        async function uploadFile(file, shotName, fileType) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('shot_name', shotName);
-            formData.append('file_type', fileType);
+async function uploadFile(file, shotName, fileType) {
+    // Find the target drop zone for loading state
+    const row = document.getElementById(`shot-row-${shotName}`);
+    if (!row) {
+        showNotification('Shot not found', 'error');
+        return;
+    }
+    let dropZoneIndex;
+    if (fileType === 'first_image') dropZoneIndex = 2;
+    else if (fileType === 'last_image') dropZoneIndex = 3;
+    else if (fileType === 'video') dropZoneIndex = 4;
+    else return; // Invalid type
+    const dropZone = row.children[dropZoneIndex];
+    if (!dropZone || !dropZone.classList.contains('drop-zone')) {
+        showNotification('Drop zone not found', 'error');
+        return;
+    }
 
-            try {
-                showNotification('Uploading file...');
-                
-                const response = await fetch('/api/shots/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+    // Compute wasEmpty before mutation
+    const shotIdx = shots.findIndex(s => s.name === shotName);
+    const wasEmpty = shotIdx === -1 || !(shots[shotIdx][fileType] && ((shots[shotIdx][fileType].max_version || 0) > 0 || (shots[shotIdx][fileType].current_version || 0) > 0));
 
-                const result = await response.json();
+    // Add loading state
+    dropZone.classList.add('uploading');
+    showNotification('Uploading file...');
 
-                if (result.success) {
-                    showNotification(`${file.name} uploaded successfully!`);
-                    loadShots(`shot-row-${shotName}`); // Refresh and keep scroll
-                } else {
-                    showNotification(result.error || 'Upload failed', 'error');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('shot_name', shotName);
+    formData.append('file_type', fileType);
+
+    try {
+        const response = await fetch('/api/shots/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            if (shotIdx !== -1) {
+                const shot = shots[shotIdx];
+                let asset = shot[fileType] || {};
+                asset.file = result.data.final_path;
+                asset.thumbnail = result.data.thumbnail;
+                asset.current_version = result.data.version;
+                asset.max_version = Math.max(asset.max_version || 0, result.data.version);
+                shot[fileType] = asset;
+
+                // Optionally fetch prompt for tooltip
+                if (asset.current_version > 0) {
+                    try {
+                        const promptResp = await fetch(`/api/shots/prompt?shot_name=${encodeURIComponent(shotName)}&asset_type=${fileType}&version=${asset.current_version}`);
+                        const promptData = await promptResp.json();
+                        if (promptData.success) {
+                            asset.prompt = promptData.data || '';
+                        }
+                    } catch (promptErr) {
+                        console.warn('Failed to fetch prompt:', promptErr);
+                    }
                 }
-            } catch (error) {
-                console.error('Upload error:', error);
-                showNotification('Upload failed', 'error');
+
+                // Update UI for this drop zone
+                if (wasEmpty) {
+                    // Was empty: replace entire drop zone
+                    replaceDropZoneForShot(shotName, fileType, shot);
+                } else {
+                    // Already had file: update existing
+                    updateDropZoneForShot(shotName, fileType, shot);
+                }
+
+                showNotification(`${file.name} uploaded successfully!`);
+            } else {
+                showNotification('Shot data not found', 'error');
             }
+        } else {
+            showNotification(result.error || 'Upload failed', 'error');
         }
+    } catch (error) {
+        console.error('Upload error:', error);
+        showNotification('Upload failed', 'error');
+    } finally {
+        // Remove loading state (re-select in case replaced)
+        const row2 = document.getElementById(`shot-row-${shotName}`);
+        const dz = row2 ? row2.children[dropZoneIndex] : dropZone;
+        if (dz && dz.classList.contains('uploading')) {
+            dz.classList.remove('uploading');
+        }
+    }
+}
 
         async function cycleAssetVersion(shotName, assetType) {
             const shot = shots.find(s => s.name === shotName);
@@ -1079,57 +1142,87 @@
             }
         }
 
-        // Helper function to update a specific drop zone
-        function updateDropZoneForShot(shotName, assetType, shotData) {
-            const assetInfo = shotData[assetType];
-            if (!assetInfo) return;
+// Helper function to update a specific drop zone
+function updateDropZoneForShot(shotName, assetType, shotData) {
+    const assetInfo = shotData[assetType];
+    if (!assetInfo) return;
 
-            // Find the specific drop zone for this shot and asset type
-            const shotRow = document.getElementById(`shot-row-${shotName}`);
-            if (!shotRow) return;
+    // Find the specific drop zone for this shot and asset type
+    const shotRow = document.getElementById(`shot-row-${shotName}`);
+    if (!shotRow) return;
 
-            // Get the drop zone based on asset type - they appear in specific order after action-cell:
-            // [0] action-cell, [1] shot-name, [2] first_image, [3] last_image, [4] video, [5] notes
-            let dropZone = null;
-            if (assetType === 'first_image') {
-                dropZone = shotRow.children[2]; // first child after action and name
-            } else if (assetType === 'last_image') {
-                dropZone = shotRow.children[3];
-            } else if (assetType === 'video') {
-                dropZone = shotRow.children[4];
-            }
+    // Get the drop zone based on asset type - they appear in specific order after action-cell:
+    // [0] action-cell, [1] shot-name, [2] first_image, [3] last_image, [4] video, [5] notes
+    let dropZone = null;
+    if (assetType === 'first_image') {
+        dropZone = shotRow.children[2]; // first child after action and name
+    } else if (assetType === 'last_image') {
+        dropZone = shotRow.children[3];
+    } else if (assetType === 'video') {
+        dropZone = shotRow.children[4];
+    }
 
-            if (!dropZone || !dropZone.classList.contains('drop-zone')) return;
+    if (!dropZone || !dropZone.classList.contains('drop-zone')) return;
 
-            // Update the version badge
-            const versionBadge = dropZone.querySelector('.version-badge');
-            if (versionBadge) {
-                versionBadge.textContent = `v${String(assetInfo.current_version).padStart(3, '0')}`;
-            }
+    // Update the version badge
+    const versionBadge = dropZone.querySelector('.version-badge');
+    if (versionBadge) {
+        versionBadge.textContent = `v${String(assetInfo.current_version).padStart(3, '0')}`;
+    }
 
-            // Update the thumbnail
-            const filePreview = dropZone.querySelector('.file-preview');
-            if (filePreview) {
-                const thumbnailContainer = filePreview.querySelector('.preview-thumbnail, .video-thumbnail');
-                if (thumbnailContainer && assetInfo.thumbnail) {
-                    // Force thumbnail refresh by adding timestamp parameter
-                    const newThumbnailUrl = `${assetInfo.thumbnail}?v=${Date.now()}`;
-                    if (thumbnailContainer.tagName.toLowerCase() === 'img') {
-                        thumbnailContainer.src = newThumbnailUrl;
-                    } else {
-                        // For video thumbnails (div with background-image)
-                        thumbnailContainer.style.backgroundImage = `url('${newThumbnailUrl}')`;
-                    }
-                }
-            }
-
-            // Update the prompt button data attributes
-            const promptButton = dropZone.querySelector('.prompt-button');
-            if (promptButton) {
-                promptButton.setAttribute('data-current-version', assetInfo.current_version);
-                promptButton.setAttribute('data-max-version', assetInfo.max_version);
+    // Update the thumbnail
+    const filePreview = dropZone.querySelector('.file-preview');
+    if (filePreview) {
+        const thumbnailContainer = filePreview.querySelector('.preview-thumbnail, .video-thumbnail');
+        if (thumbnailContainer && assetInfo.thumbnail) {
+            // Force thumbnail refresh by adding timestamp parameter
+            const newThumbnailUrl = `${assetInfo.thumbnail}?v=${Date.now()}`;
+            if (thumbnailContainer.tagName.toLowerCase() === 'img') {
+                thumbnailContainer.src = newThumbnailUrl;
+            } else {
+                // For video thumbnails (div with background-image)
+                thumbnailContainer.style.backgroundImage = `url('${newThumbnailUrl}')`;
             }
         }
+    }
+
+    // Update the prompt button data attributes
+    const promptButton = dropZone.querySelector('.prompt-button');
+    if (promptButton) {
+        promptButton.setAttribute('data-current-version', assetInfo.current_version);
+        promptButton.setAttribute('data-max-version', assetInfo.max_version);
+    }
+
+    // Update caption input if present
+    const captionInput = dropZone.querySelector('.asset-caption-input');
+    if (captionInput && assetInfo.caption !== undefined) {
+        captionInput.value = assetInfo.caption || '';
+    }
+}
+
+// Helper to replace an empty drop zone with filled markup
+function replaceDropZoneForShot(shotName, assetType, shotData) {
+    const shotRow = document.getElementById(`shot-row-${shotName}`);
+    if (!shotRow) return;
+
+    let dropZoneIndex;
+    if (assetType === 'first_image') dropZoneIndex = 2;
+    else if (assetType === 'last_image') dropZoneIndex = 3;
+    else if (assetType === 'video') dropZoneIndex = 4;
+    else return;
+
+    const oldDropZone = shotRow.children[dropZoneIndex];
+    if (!oldDropZone || !oldDropZone.classList.contains('drop-zone')) return;
+
+    // Generate new HTML for the drop zone
+    const newHtml = createDropZone(shotData, assetType);
+
+    // Replace the old drop zone
+    oldDropZone.outerHTML = newHtml;
+
+    // Reinitialize tooltips after DOM replacement
+    setTimeout(initTooltips, 0);
+}
 
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
@@ -1177,49 +1270,56 @@
             event.currentTarget.classList.remove('drag-over', 'new-shot-drop-zone');
         }
 
-        async function handleRowDrop(event) {
-            event.preventDefault();
-            event.currentTarget.classList.remove('drag-over', 'new-shot-drop-zone');
+async function handleRowDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('drag-over', 'new-shot-drop-zone');
 
-            const files = event.dataTransfer.files;
-            if (files.length === 0) return;
+    const files = event.dataTransfer.files;
+    if (files.length === 0) return;
 
-            const afterShot = event.currentTarget.getAttribute('data-after-shot');
+    const afterShot = event.currentTarget.getAttribute('data-after-shot');
+    
+    try {
+        // Create new shot
+        const response = await fetch('/api/shots/create-between', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                after_shot: afterShot || null
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const newShot = result.data;
+            showNotification(`Shot ${newShot.name} created`);
             
-            try {
-                // Create new shot
-                const response = await fetch('/api/shots/create-between', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        after_shot: afterShot || null
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    const newShot = result.data;
-                    showNotification(`Shot ${newShot.name} created`);
-                    
-                    // Upload the file to the new shot
-                    const file = files[0];
-                    const fileType = getFileType(file.name);
-                    
-                    if (fileType) {
-                        await uploadFile(file, newShot.name, fileType);
-                    } else {
-                        showNotification('Unsupported file type', 'error');
-                        loadShots(`shot-row-${newShot.name}`); // Still refresh to show the new shot
-                    }
-                } else {
-                    showNotification(result.error || 'Failed to create shot', 'error');
-                }
-            } catch (error) {
-                console.error('Error creating shot:', error);
-                showNotification('Error creating shot', 'error');
+            // Insert new shot into local state and render before upload
+            const insertIndex = afterShot ? shots.findIndex(s => s.name === afterShot) + 1 : 0;
+            shots.splice(insertIndex, 0, newShot);
+            captureScroll(`shot-row-${newShot.name}`);
+            renderShots();
+            restoreScroll();
+            
+            // Upload the file to the new shot
+            const file = files[0];
+            const fileType = getFileType(file.name);
+            
+            if (fileType) {
+                await uploadFile(file, newShot.name, fileType);
+            } else {
+                showNotification('Unsupported file type', 'error');
+                // No need for loadShots since we already rendered the new row
             }
+        } else {
+            showNotification(result.error || 'Failed to create shot', 'error');
         }
+    } catch (error) {
+        console.error('Error creating shot:', error);
+        showNotification('Error creating shot', 'error');
+    }
+}
 
         function getFileType(filename) {
             const ext = filename.toLowerCase().split('.').pop();
