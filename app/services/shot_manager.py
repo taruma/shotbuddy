@@ -4,6 +4,15 @@ import logging
 import re
 import json
 
+from app.config.constants import (
+    ALLOWED_IMAGE_EXTENSIONS,
+    ALLOWED_VIDEO_EXTENSIONS,
+    THUMBNAIL_SIZE,
+    get_project_thumbnail_cache_dir,
+)
+
+from app.services.project_manager import ProjectManager
+
 logger = logging.getLogger(__name__)
 
 # Shot names may optionally contain a single underscore followed by another
@@ -68,14 +77,6 @@ def save_display_name(shot_name, display_name):
     except Exception as e:
         raise ValueError(f"Failed to save display name: {str(e)}")
 
-from app.config.constants import (
-    ALLOWED_IMAGE_EXTENSIONS,
-    ALLOWED_VIDEO_EXTENSIONS,
-    THUMBNAIL_SIZE,
-    get_project_thumbnail_cache_dir,
-)
-
-from app.services.project_manager import ProjectManager
 
 class ShotManager:
     def __init__(self, project_path):

@@ -27,3 +27,14 @@ Issues = "https://github.com/taruma/shotbuddy/issues"
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13.2",
+]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "UP", "S"]  # Style, Pyflakes, isort, pyupgrade, security
+ignore = ["E501"]  # Ignore line length for now
+target-version = "py313"

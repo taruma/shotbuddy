@@ -5,7 +5,6 @@ from PIL import Image
 from app.services.prompt_importer import extract_prompt_from_png
 import logging
 
-logger = logging.getLogger(__name__)
 from app.services.shot_manager import get_shot_manager
 from app.config.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
@@ -13,6 +12,8 @@ from app.config.constants import (
     THUMBNAIL_SIZE,
     get_project_thumbnail_cache_dir,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class FileHandler:

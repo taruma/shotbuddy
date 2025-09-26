@@ -461,7 +461,7 @@ def set_display_name():
 
         # Validate shot exists
         shot_manager = get_shot_manager(project["path"])
-        shot_info = shot_manager.get_shot_info(shot_name)  # Will raise if not found
+        shot_manager.get_shot_info(shot_name)  # Will raise if not found
 
         shot_manager.save_display_name(shot_name, display_name)
         updated_info = shot_manager.get_shot_info(shot_name)

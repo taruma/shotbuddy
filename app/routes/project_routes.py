@@ -4,10 +4,10 @@ from datetime import datetime
 import logging
 import sys
 
-logger = logging.getLogger(__name__)
-
 from app.services.shot_manager import get_shot_manager, clear_shot_manager_cache
 from app.utils import get_app_version
+
+logger = logging.getLogger(__name__)
 
 project_bp = Blueprint('project', __name__)
 
