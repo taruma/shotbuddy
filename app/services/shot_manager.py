@@ -75,6 +75,8 @@ from app.config.constants import (
     get_project_thumbnail_cache_dir,
 )
 
+from app.services.project_manager import ProjectManager
+
 class ShotManager:
     def __init__(self, project_path):
         self.project_path = Path(project_path)
@@ -933,6 +935,10 @@ class ShotManager:
         if not non_archived_shots:
             raise ValueError("No non-archived shots found")
 
+        # Load project information
+        project_manager = ProjectManager()
+        project_info = project_manager.load_project_info(self.project_path)
+
         # Create export directory
         exports_root = self.project_path / 'exports'
         exports_root.mkdir(exist_ok=True)
@@ -1017,11 +1023,27 @@ class ShotManager:
 
             # Build MD content
             md_lines = [
-                f"# Export Summary: {self.project_path.name}",
-                f"**Date:** {timestamp}",
-                f"**Type:** {export_type}",
-                ""
+                f"# {project_info.get('title', self.project_path.name)}",
+                "",
+                "## Project Information",
             ]
+
+            # Add bullet points for non-empty project fields
+            if project_info.get('short_description'):
+                md_lines.append(f"- **Short Description:** {project_info.get('short_description')}")
+
+            if project_info.get('notes'):
+                md_lines.append(f"- **Project Notes:** {project_info.get('notes')}")
+
+            if project_info.get('tags'):
+                md_lines.append(f"- **Tags:** {', '.join(project_info.get('tags'))}")
+
+            md_lines.extend([
+                "",
+                f"**Export Date:** {timestamp}",
+                f"**Export Type:** {export_type}",
+                ""
+            ])
 
             # First Frame table
             if first_data:
