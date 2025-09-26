@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.2.0 (September 26, 2025) - by Taruma Sakti
+
+This minor release focuses on code quality improvements, security enhancements, and UI/UX refinements for file uploads and exports.
+
+### Added
+- **Ruff Linting Configuration**: Added Ruff linting setup with custom rules (line-length=120, target-version=py313, select=E,F,I,UP,S; ignore=E501,S603) to enforce code style and security standards.
+
+### Changed
+- **Server Configuration**: Bound the Flask server to localhost (127.0.0.1) for local-only access, improving security in development environments.
+- **Import Organization**: Reorganized imports across the codebase for better structure and maintainability.
+
+### Fixed
+- **Linting and Security Issues**: Resolved Ruff violations including formatting, empty try-except blocks, and subprocess security warnings (suppressed S603 for trusted calls). Auto-fixed imports where possible.
+- **Upload UI Enhancements** (fix #5): Added loading states and immediate UI updates in `uploadFile` for shots, reducing perceived latency during asset uploads.
+- **Export Summary Details** (fix #4): Enhanced export summaries in `shot_manager` to include project metadata (e.g., title, version) for better context in exported files.
+
+### AI Development Attribution
+This release was developed with AI assistance using Cline's Plan/Act workflow, powered by the Grok-4-Fast model. All generated changes were manually reviewed, tested, and refined by the maintainer, Taruma Sakti, to ensure quality and alignment with project goals.
+
+This version improves development hygiene and user feedback loops without introducing breaking changes.
+
 ## v3.1.0 (September 25, 2025) - by Taruma Sakti
 
 This minor release introduces enhancements for project management and macOS compatibility.
