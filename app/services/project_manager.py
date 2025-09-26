@@ -1,9 +1,10 @@
 # project_manager.py
 
-from pathlib import Path
 import json
-from datetime import datetime
 import logging
+from datetime import datetime
+from pathlib import Path
+
 from app.config.constants import PROJECTS_FILE
 
 logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class ProjectManager:
 
         if project_info_path.exists():
             try:
-                with open(project_info_path, 'r', encoding='utf-8') as f:
+                with open(project_info_path, encoding='utf-8') as f:
                     project_info = json.load(f)
                     # Ensure all fields are present
                     defaults = {
@@ -156,7 +157,7 @@ class ProjectManager:
         existing_info = {}
         if project_info_path.exists():
             try:
-                with open(project_info_path, 'r', encoding='utf-8') as f:
+                with open(project_info_path, encoding='utf-8') as f:
                     existing_info = json.load(f)
             except Exception as e:
                 logger.warning("Failed to load existing project info for save: %s", e)
@@ -218,7 +219,7 @@ class ProjectManager:
             # Load existing project info or create defaults
             if project_info_path.exists():
                 try:
-                    with open(project_info_path, 'r', encoding='utf-8') as f:
+                    with open(project_info_path, encoding='utf-8') as f:
                         project_info = json.load(f)
                 except Exception as e:
                     logger.warning("Failed to load existing project info for timestamp update: %s", e)

@@ -1,13 +1,14 @@
-from flask import Blueprint, request, jsonify, render_template, current_app
-from pathlib import Path
-from datetime import datetime
 import logging
 import sys
+from datetime import datetime
+from pathlib import Path
+
+from flask import Blueprint, current_app, jsonify, render_template, request
+
+from app.services.shot_manager import clear_shot_manager_cache, get_shot_manager
+from app.utils import get_app_version
 
 logger = logging.getLogger(__name__)
-
-from app.services.shot_manager import get_shot_manager, clear_shot_manager_cache
-from app.utils import get_app_version
 
 project_bp = Blueprint('project', __name__)
 
@@ -229,8 +230,7 @@ def browse_folder():
 
         # Try to use tkinter for native folder dialog first
         try:
-            from tkinter import Tk
-            from tkinter import filedialog
+            from tkinter import Tk, filedialog
 
             # Create and hide the root window
             root = Tk()
@@ -254,19 +254,25 @@ def browse_folder():
         # macOS fallback: AppleScript NSOpenPanel
         try:
             if sys.platform == "darwin":
+                import shutil
                 import subprocess
                 script = 'POSIX path of (choose folder with prompt "Select Project Folder")'
-                result = subprocess.run(
-                    ["osascript", "-e", script],
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-                folder_path = result.stdout.strip()
-                if folder_path:
-                    return jsonify({"success": True, "data": {"path": folder_path}})
+                osascript_path = shutil.which("osascript")
+                if osascript_path:
+                    result = subprocess.run(
+                        [osascript_path, "-e", script],
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        shell=False
+                    )  # noqa: S603
+                    folder_path = result.stdout.strip()
+                    if folder_path:
+                        return jsonify({"success": True, "data": {"path": folder_path}})
+                    else:
+                        return jsonify({"success": False, "error": "No folder selected"}), 400
                 else:
-                    return jsonify({"success": False, "error": "No folder selected"}), 400
+                    raise FileNotFoundError("osascript not found")
         except Exception as e:
             logger.warning("AppleScript folder picker failed: %s", e)
 

@@ -5,12 +5,13 @@ import time
 import webbrowser
 from configparser import ConfigParser
 from pathlib import Path
+
 from dotenv import load_dotenv
+
+from app import create_app
 
 # Load environment variables from .env file
 load_dotenv()
-
-from app import create_app
 
 
 def load_server_config():

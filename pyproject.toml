@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shotbuddy"
-version = "3.1.0"
+version = "3.2.0"
 description = "AI-driven image-to-video filmmaking workflow manager"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
@@ -27,3 +27,16 @@ Issues = "https://github.com/taruma/shotbuddy/issues"
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13.2",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "S"]  # Style, Pyflakes, isort, pyupgrade, security
+ignore = ["E501", "S603"]  # Ignore line length and subprocess untrusted input for trusted calls
