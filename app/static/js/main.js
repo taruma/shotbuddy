@@ -2074,7 +2074,7 @@ function playVideo(shotName, displayName) {
         return;
     }
 
-    const videoUrl = `/api/shots/video/${shotName}`;
+    const videoUrl = `/api/shots/video/${shotName}?v=${Date.now()}`;
     const videoPlayer = document.getElementById('video-player');
     const videoModalTitle = document.getElementById('video-modal-title');
     const videoVersion = document.getElementById('video-version');
