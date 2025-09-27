@@ -1234,107 +1234,252 @@
             font-size: 14px;
         }
 
-        /* Back to Top Button */
-        .back-to-top {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #00c851;
-            color: #1a1a1a;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            border: none;
-            padding: 0;
-        }
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00c851;
+    color: #1a1a1a;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: none;
+    padding: 0;
+}
 
-        .back-to-top:hover {
-            background: #00a143;
-            transform: translateX(-50%) translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
+.back-to-top:hover {
+    background: #00a143;
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
 
-        .back-to-top.show {
-            opacity: 1;
-            visibility: visible;
-        }
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
 
-        .back-to-top:active {
-            transform: translateX(-50%) translateY(-1px);
-        }
+.back-to-top:active {
+    transform: translateX(-50%) translateY(-1px);
+}
 
-        /* Arrow icon using CSS */
-        .back-to-top::after {
-            content: "";
-            display: block;
-            width: 16px;
-            height: 16px;
-            border-top: 3px solid #1a1a1a;
-            border-right: 3px solid #1a1a1a;
-            transform: rotate(-45deg);
-            margin-top: 2px;
-        }
+/* Arrow icon using CSS */
+.back-to-top::after {
+    content: "";
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid #1a1a1a;
+    border-right: 3px solid #1a1a1a;
+    transform: rotate(-45deg);
+    margin-top: 2px;
+}
 
-        /* Tooltip Styles */
-        .tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.9);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            line-height: 1.4;
-            z-index: 10000;
-            max-width: 300px;
-            word-wrap: break-word;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            text-align: left;
-            white-space: normal;
-        }
+/* Video Modal Styles */
+.video-modal-content {
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    padding: 20px;
+    position: relative;
+    background: #252525;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
 
-        .tooltip.show {
-            opacity: 1;
-        }
+.video-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #404040;
+}
 
-        /* Light theme tooltip */
-        .light .tooltip {
-            background: rgba(255, 255, 255, 0.95);
-            color: #1a1a1a;
-            border: 1px solid #ddd;
-        }
+.video-header h3 {
+    margin: 0;
+    color: #e5e5e5;
+    font-size: 18px;
+    font-weight: 600;
+}
 
-        /* Light theme override */
-        .light .back-to-top {
-            background: #00c851;
-            color: #1a1a1a;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        }
+.video-version {
+    color: #b5b5b5;
+    font-size: 14px;
+    background: #3a3a3a;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
 
-        .light .back-to-top:hover {
-            background: #00a143;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
+.video-container {
+    width: 100%;
+    max-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
 
-        .light .back-to-top::after {
-            border-top: 3px solid #1a1a1a;
-            border-right: 3px solid #1a1a1a;
-        }
+#video-player {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    background: #000;
+}
+
+.video-info {
+    padding: 10px 0;
+}
+
+.video-prompt {
+    font-style: italic;
+    color: #b5b5b5;
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 6px;
+    border-left: 3px solid #00c851;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+/* Play button overlay for video thumbnails */
+.video-thumbnail {
+    position: relative;
+    cursor: pointer;
+}
+
+.video-thumbnail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 6px;
+}
+
+.video-thumbnail::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.video-thumbnail:hover::before,
+.video-thumbnail:hover::after {
+    opacity: 1;
+}
+
+/* Light theme styles for video modal */
+.light .video-modal-content {
+    background: #ffffff;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+}
+
+.light .video-header {
+    border-bottom: 1px solid #ddd;
+}
+
+.light .video-header h3 {
+    color: #333;
+}
+
+.light .video-version {
+    color: #666;
+    background: #f0f0f0;
+}
+
+.light .video-container {
+    background: #f5f5f5;
+}
+
+.light .video-prompt {
+    color: #666;
+    background: #f8f8f8;
+    border-left: 3px solid #00c851;
+}
+
+.light .video-thumbnail::before {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.light .video-thumbnail::after {
+    color: #333;
+}
+
+/* Tooltip Styles */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    z-index: 10000;
+    max-width: 300px;
+    word-wrap: break-word;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    text-align: left;
+    white-space: normal;
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+/* Light theme tooltip */
+.light .tooltip {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a1a;
+    border: 1px solid #ddd;
+}
+
+/* Light theme override */
+.light .back-to-top {
+    background: #00c851;
+    color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.light .back-to-top:hover {
+    background: #00a143;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.light .back-to-top::after {
+    border-top: 3px solid #1a1a1a;
+    border-right: 3px solid #1a1a1a;
+}
 
 /* Compact Project Info Modal */
 #project-info-modal .modal-content {

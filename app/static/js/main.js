@@ -858,7 +858,7 @@
                     const videoStyle = thumbnailUrl ?
                         `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` :
                         'background: #404040;';
-                    mediaHtml = `<div class="preview-thumbnail video-thumbnail" style="${videoStyle}"></div>`;
+                    mediaHtml = `<div class="preview-thumbnail video-thumbnail" style="${videoStyle}" onclick="playVideo('${shot.name}', '${shot.display_name || ''}')"></div>`;
                 } else {
                     mediaHtml = thumbnailUrl ?
                         `<img class="preview-thumbnail" src="${thumbnailUrl}" alt="${displayAssetLabel(type)} thumbnail">` :
@@ -2066,6 +2066,79 @@ async function confirmExport() {
     }
 }
 
+// Video Playback Functions
+function playVideo(shotName, displayName) {
+    const shot = shots.find(s => s.name === shotName);
+    if (!shot || !shot.video || !shot.video.file) {
+        showNotification('No video available for this shot', 'error');
+        return;
+    }
+
+    const videoUrl = `/api/shots/video/${shotName}`;
+    const videoPlayer = document.getElementById('video-player');
+    const videoModalTitle = document.getElementById('video-modal-title');
+    const videoVersion = document.getElementById('video-version');
+    const videoPrompt = document.getElementById('video-prompt');
+
+    // Set video source
+    videoPlayer.src = videoUrl;
+    
+    // Set modal title and version
+    if (displayName) {
+        videoModalTitle.innerHTML = `${escapeHtml(displayName)}<br><span style="font-size: 14px; opacity: 0.7; font-weight: normal;">(${shotName})</span>`;
+    } else {
+        videoModalTitle.textContent = shotName;
+    }
+    
+    videoVersion.textContent = String(shot.video.current_version).padStart(3, '0');
+    
+    // Set prompt text if available
+    if (shot.video.prompt) {
+        videoPrompt.textContent = shot.video.prompt;
+        videoPrompt.style.display = 'block';
+    } else {
+        videoPrompt.textContent = '';
+        videoPrompt.style.display = 'none';
+    }
+
+    // Show modal
+    document.getElementById('video-modal').style.display = 'flex';
+    
+    // Load and play video
+    videoPlayer.load();
+    videoPlayer.play().catch(e => {
+        console.log('Autoplay prevented:', e);
+    });
+}
+
+function closeVideoModal() {
+    const videoModal = document.getElementById('video-modal');
+    const videoPlayer = document.getElementById('video-player');
+    
+    videoModal.style.display = 'none';
+    videoPlayer.pause();
+    videoPlayer.currentTime = 0;
+    videoPlayer.src = '';
+}
+
+// Close video modal when clicking outside
+document.addEventListener('click', function(event) {
+    const videoModal = document.getElementById('video-modal');
+    if (event.target === videoModal) {
+        closeVideoModal();
+    }
+});
+
+// Close video modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const videoModal = document.getElementById('video-modal');
+        if (videoModal.style.display === 'flex') {
+            closeVideoModal();
+        }
+    }
+});
+
 // Expose functions globally
 window.openProjectInfoModal = openProjectInfoModal;
 window.closeProjectInfoModal = closeProjectInfoModal;
@@ -2076,3 +2149,5 @@ window.saveReorder = saveReorder;
 window.openExportModal = openExportModal;
 window.closeExportModal = closeExportModal;
 window.confirmExport = confirmExport;
+window.playVideo = playVideo;
+window.closeVideoModal = closeVideoModal;

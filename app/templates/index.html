@@ -300,6 +300,25 @@
         </div>
     </div>
 
+    <!-- Video Playback Modal -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content video-modal-content">
+            <button class="close-modal" onclick="closeVideoModal()">&times;</button>
+            <div class="video-header">
+                <h3 id="video-modal-title"></h3>
+                <div class="video-version">v<span id="video-version"></span></div>
+            </div>
+            <div class="video-container">
+                <video id="video-player" controls>
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="video-info">
+                <div id="video-prompt" class="video-prompt"></div>
+            </div>
+        </div>
+    </div>
+
     <footer class='app-footer'>Maintained by <a href="https://genai.taruma.info" target="_blank" rel="noopener">Taruma Sakti</a>. <a href="https://github.com/taruma/shotbuddy" target="_blank" rel="noopener">View on GitHub</a>. Built with <a href="https://cline.bot" target="_blank" rel="noopener">Cline</a>.</footer>
     
     <!-- Back to Top Button -->
