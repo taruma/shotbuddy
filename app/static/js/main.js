@@ -774,6 +774,8 @@
                             showNotification('Shot order saved');
                             // Re-sync the local shots array with the new order
                             shots.sort((a, b) => shotOrder.indexOf(a.name) - shotOrder.indexOf(b.name));
+                            // Update the TOC to reflect the new shot order
+                            renderTOC();
                         } else {
                             showNotification(result.error || 'Failed to save order', 'error');
                         }
