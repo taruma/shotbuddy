@@ -861,7 +861,7 @@ function createDropZone(shot, type) {
             mediaHtml = `<div class="preview-thumbnail video-thumbnail" style="${videoStyle}" onclick="playVideo('${shot.name}', '${shot.display_name || ''}')"></div>`;
         } else {
             mediaHtml = thumbnailUrl ?
-                `<img class="preview-thumbnail" src="${thumbnailUrl}" alt="${displayAssetLabel(type)} thumbnail">` :
+                `<img class="preview-thumbnail" src="${thumbnailUrl}" alt="${displayAssetLabel(type)} thumbnail" onclick="showImage('${shot.name}', '${shot.display_name || ''}', '${type}')">` :
                 `<div class="preview-thumbnail placeholder"></div>`;
         }
 
@@ -2116,6 +2116,54 @@ function closeVideoModal() {
     videoPlayer.src = '';
 }
 
+// Image View Functions
+function showImage(shotName, displayName, assetType) {
+    const shot = shots.find(s => s.name === shotName);
+    if (!shot || !shot[assetType] || !shot[assetType].file) {
+        showNotification('No image available for this shot', 'error');
+        return;
+    }
+
+    const imageUrl = `/api/shots/image/${shotName}/${assetType}?v=${Date.now()}`;
+    const imageDisplay = document.getElementById('image-display');
+    const imageModalTitle = document.getElementById('image-modal-title');
+    const imageVersion = document.getElementById('image-version');
+    const imagePrompt = document.getElementById('image-prompt');
+
+    // Set image source
+    imageDisplay.src = imageUrl;
+
+    // Set modal title and version
+    const typeLabel = displayAssetLabel(assetType);
+    if (displayName) {
+        imageModalTitle.innerHTML = `${escapeHtml(displayName)} ${typeLabel}<br><span style="font-size: 14px; opacity: 0.7; font-weight: normal;">(${shotName})</span>`;
+    } else {
+        imageModalTitle.textContent = `${shotName} ${typeLabel}`;
+    }
+
+    imageVersion.textContent = String(shot[assetType].current_version).padStart(3, '0');
+
+    // Set prompt text if available
+    if (shot[assetType].prompt) {
+        imagePrompt.textContent = shot[assetType].prompt;
+        imagePrompt.style.display = 'block';
+    } else {
+        imagePrompt.textContent = '';
+        imagePrompt.style.display = 'none';
+    }
+
+    // Show modal
+    document.getElementById('image-modal').style.display = 'flex';
+}
+
+function closeImageModal() {
+    const imageModal = document.getElementById('image-modal');
+    const imageDisplay = document.getElementById('image-display');
+
+    imageModal.style.display = 'none';
+    imageDisplay.src = '';
+}
+
 // Close video modal when clicking outside
 document.addEventListener('click', function (event) {
     const videoModal = document.getElementById('video-modal');
@@ -2128,11 +2176,26 @@ document.addEventListener('click', function (event) {
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
         const videoModal = document.getElementById('video-modal');
+        const imageModal = document.getElementById('image-modal');
         if (videoModal.style.display === 'flex') {
             closeVideoModal();
+        } else if (imageModal.style.display === 'flex') {
+            closeImageModal();
         }
     }
 });
+
+// Close image modal when clicking outside
+document.addEventListener('click', function (event) {
+    const imageModal = document.getElementById('image-modal');
+    if (event.target === imageModal) {
+        closeImageModal();
+    }
+});
+
+// Expose image functions globally
+window.showImage = showImage;
+window.closeImageModal = closeImageModal;
 
 // Expose functions globally
 window.openProjectInfoModal = openProjectInfoModal;
