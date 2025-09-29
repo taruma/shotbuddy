@@ -952,10 +952,8 @@ async function addNewShot() {
         const result = await response.json();
 
         if (result.success) {
-            shots.push(result.data);
-            captureScroll(`shot-row-${result.data.name}`);
-            renderShots();
-            restoreScroll();
+            // Force reload shots from server to ensure fresh data including notes
+            loadShots(`shot-row-${result.data.name}`);
             showNotification(`Shot ${result.data.name} created`);
         } else {
             showNotification(result.error || 'Failed to create shot', 'error');
@@ -977,11 +975,8 @@ async function addNewShotAfter(afterShot) {
         const result = await response.json();
 
         if (result.success) {
-            const index = afterShot ? shots.findIndex(s => s.name === afterShot) + 1 : 0;
-            shots.splice(index, 0, result.data);
-            captureScroll(`shot-row-${result.data.name}`);
-            renderShots();
-            restoreScroll();
+            // Force reload shots from server to ensure fresh data including notes
+            loadShots(`shot-row-${result.data.name}`);
             showNotification(`Shot ${result.data.name} created`);
         } else {
             showNotification(result.error || 'Failed to create shot', 'error');
