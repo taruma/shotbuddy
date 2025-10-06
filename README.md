@@ -5,7 +5,7 @@
 <h1 align="center">SHOTBUDDY v3</h1>
 
 <p align="center">
-  <strong>Your AI Filmmaking Assistant.</strong>
+  <strong>Your AI Filmmaking Asset Manager.</strong>
   <br />
   An open-source tool designed to manage, organize, and streamline your entire AI-driven image-to-video workflow.
 </p>
