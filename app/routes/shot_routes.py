@@ -469,6 +469,68 @@ def export_latest_assets():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@shot_bp.route("/video/<shot_name>")
+def serve_video(shot_name):
+    """Serve the promoted video file for a shot from latest_videos directory."""
+    try:
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return "No current project", 400
+
+        shot_manager = get_shot_manager(project["path"])
+        shot_info = shot_manager.get_shot_info(shot_name)
+        
+        # Get the promoted video file path
+        video_path = shot_info['video']['file']
+        if not video_path:
+            return "No video found for this shot", 404
+            
+        video_file = Path(video_path)
+        if not video_file.exists():
+            return "Video file not found", 404
+            
+        # Serve the video file with proper headers
+        resp = send_file(str(video_file))
+        resp.headers["Content-Disposition"] = f'inline; filename="{video_file.name}"'
+        resp.headers["Cache-Control"] = "public, max-age=3600"
+        return resp
+    except Exception as e:
+        return str(e), 500
+
+@shot_bp.route("/image/<shot_name>/<asset_type>")
+def serve_image(shot_name, asset_type):
+    """Serve the promoted image file for a shot from latest_images directory."""
+    try:
+        project_manager = current_app.config['PROJECT_MANAGER']
+        project = project_manager.get_current_project()
+        if not project:
+            return "No current project", 400
+
+        shot_manager = get_shot_manager(project["path"])
+        shot_info = shot_manager.get_shot_info(shot_name)
+        
+        # Validate asset type
+        if asset_type not in ['first_image', 'last_image']:
+            return "Invalid asset type", 400
+            
+        # Get the promoted image file path
+        image_path = shot_info[asset_type]['file']
+        if not image_path:
+            return f"No {asset_type} found for this shot", 404
+            
+        image_file = Path(image_path)
+        if not image_file.exists():
+            return "Image file not found", 404
+            
+        # Serve the image file with proper headers
+        resp = send_file(str(image_file))
+        resp.headers["Content-Disposition"] = f'inline; filename="{image_file.name}"'
+        resp.headers["Cache-Control"] = "public, max-age=3600"
+        return resp
+    except Exception as e:
+        return str(e), 500
+
 @shot_bp.route("/display-name", methods=["POST"])
 def set_display_name():
     try:

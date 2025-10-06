@@ -1,5 +1,29 @@
 # Changelog
 
+## v3.3.0 (October 6, 2025) - by Taruma Sakti
+
+This minor release introduces enhanced media serving capabilities, improved UI responsiveness, and code quality refinements for better user experience and maintainability.
+
+### Added
+- **Image and Video Serving Endpoints**: Added new routes `/image/<shot_name>` and `/video/<shot_name>` to serve promoted media files from latest_images and latest_videos directories with proper validation and error handling.
+- **Media Modal UI**: Enhanced modal interfaces for both images and videos with responsive design, light theme support, and improved user experience for viewing shot assets.
+- **Cache-Busting Parameters**: Added timestamp query parameters to media URLs to prevent browser caching issues and ensure users always see the latest versions.
+- **Shot Order Persistence Helpers**: Extracted shot order loading and saving into dedicated `_load_shot_order` and `_save_shot_order` methods with improved error handling and duplicate removal.
+
+### Changed
+- **CSS Restructuring**: Reorganized main stylesheet with improved organization and maintainability, including reordering and grouping related styles, removing duplicates, and consolidating similar rules.
+- **Server Reload Integration**: Replaced local shot updates with server reloads after creating new shots to ensure UI displays fresh data including server-side additions.
+- **TOC Auto-Refresh**: Enhanced Table of Contents to automatically update after saving shot order changes for better UI consistency.
+- **Code Formatting**: Improved code readability by removing excessive leading whitespace and maintaining consistent formatting across the codebase.
+
+### Fixed
+- **Shot Order Integration**: Fixed shot order persistence when creating new shots between existing ones by integrating order management into `create_shot_between` method.
+
+### AI Development Attribution
+This release was developed with AI assistance using Cline's Plan/Act workflow, powered by the Grok-4-Fast, Deepseek v3.1, and GPT-5 model. All generated changes were manually reviewed, tested, and refined by the maintainer, Taruma Sakti, to ensure quality and alignment with project goals.
+
+This version enhances media viewing capabilities and code maintainability while improving overall user experience.
+
 ## v3.2.0 (September 26, 2025) - by Taruma Sakti
 
 This minor release focuses on code quality improvements, security enhancements, and UI/UX refinements for file uploads and exports.

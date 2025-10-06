@@ -94,6 +94,33 @@ class ShotManager:
         self.latest_videos_dir.mkdir(parents=True, exist_ok=True)
         self.thumbnail_cache_dir = get_project_thumbnail_cache_dir(self.project_path)
 
+    def _load_shot_order(self):
+        """Load shot order list from JSON file."""
+        try:
+            if self.order_file.exists():
+                with self.order_file.open('r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        return data
+        except Exception:
+            logger.exception("Error loading shot order")
+        return []
+
+    def _save_shot_order(self, names):
+        """Persist shot order list to JSON file."""
+        try:
+            cleaned = []
+            seen = set()
+            for name in names:
+                if isinstance(name, str) and name not in seen:
+                    cleaned.append(name)
+                    seen.add(name)
+            self.shots_dir.mkdir(parents=True, exist_ok=True)
+            with self.order_file.open('w', encoding='utf-8') as f:
+                json.dump(cleaned, f)
+        except Exception:
+            logger.warning("Failed to save shot order file")
+
     def _load_archived(self):
         """Load archived shot names from JSON file."""
         import json
@@ -258,33 +285,24 @@ class ShotManager:
 
         shot_dirs = [d for d in self.wip_dir.iterdir() if d.is_dir() and d.name.startswith('SH')]
         
-        if self.order_file.exists():
-            import json
-            with self.order_file.open('r') as f:
-                ordered_names = json.load(f)
-            
-            # Create a map of name to directory for quick lookup
+        ordered_names = self._load_shot_order()
+        if ordered_names:
             dir_map = {d.name: d for d in shot_dirs}
-            
-            # Reorder shot_dirs based on the loaded order
             ordered_dirs = [dir_map[name] for name in ordered_names if name in dir_map]
-            
-            # Add any new shots that are not in the order file yet
-            existing_ordered_names = set(ordered_names)
+            existing_ordered_names = {d.name for d in ordered_dirs}
             new_dirs = [d for d in shot_dirs if d.name not in existing_ordered_names]
-            
-            shot_dirs = ordered_dirs + sorted(new_dirs) # Sort new dirs by name
+            shot_dirs = ordered_dirs + sorted(new_dirs, key=lambda d: d.name)
         else:
-            shot_dirs = sorted(shot_dirs)
+            shot_dirs = sorted(shot_dirs, key=lambda d: d.name)
 
         shots = [self.get_shot_info(shot_dir.name) for shot_dir in shot_dirs]
         return shots
 
     def save_shot_order(self, shot_order):
         """Save the order of shots."""
-        import json
-        with self.order_file.open('w') as f:
-            json.dump(shot_order, f)
+        if not isinstance(shot_order, list):
+            raise ValueError('Shot order must be a list')
+        self._save_shot_order(shot_order)
 
     def create_shot_between(self, after_shot=None):
         """Create a new shot between existing shots.
@@ -348,6 +366,32 @@ class ShotManager:
             raise ValueError(f"Shot {shot_name} already exists")
 
         self.create_shot_structure(shot_name)
+
+        order_names = self._load_shot_order()
+        if order_names:
+            existing_order_set = set(order_names)
+            for name in existing:
+                if name not in existing_order_set:
+                    order_names.append(name)
+        else:
+            order_names = existing[:]
+
+        order_names = [name for name in order_names if name != shot_name]
+
+        if not after_shot:
+            order_names.insert(0, shot_name)
+        else:
+            try:
+                idx = order_names.index(after_shot)
+                order_names.insert(idx + 1, shot_name)
+            except ValueError:
+                order_names.append(shot_name)
+
+        if not order_names:
+            order_names = [shot_name]
+
+        self._save_shot_order(order_names)
+
         return self.get_shot_info(shot_name)
 
     def _create_subshot_name(self, base_shot, existing):
