@@ -266,17 +266,28 @@ class ShotManager:
         return shot_dir
 
     def get_next_shot_number(self):
-        """Get next available shot number."""
+        """Get next available shot number, filling gaps first."""
         existing_shots = []
         if self.wip_dir.exists():
             for shot_dir in self.wip_dir.iterdir():
                 if shot_dir.is_dir() and shot_dir.name.startswith('SH'):
                     try:
-                        existing_shots.append(int(shot_dir.name[2:]))
+                        # Only consider top-level shots (no underscores)
+                        if '_' not in shot_dir.name:
+                            existing_shots.append(int(shot_dir.name[2:]))
                     except ValueError:
                         continue
-
-        return (max(existing_shots) + 10) if existing_shots else 10
+        
+        if not existing_shots:
+            return 1
+        
+        # Find first available gap starting from 1
+        for i in range(1, 1000):
+            if i not in existing_shots:
+                return i
+        
+        # If no gaps found (all 999 numbers used), raise error
+        raise ValueError("No available shot numbers (maximum 999 reached)")
 
     def get_shots(self):
         """Get all shots in the project."""
@@ -325,19 +336,8 @@ class ShotManager:
         existing = [s["name"] for s in self.get_shots()]
 
         if not after_shot:
-            # Insert before the first shot using the original numeric scheme
-            if not existing:
-                new_number = 10
-            else:
-                first_number = min(int(s[2:]) for s in existing)
-                candidate = max(first_number // 2, 1)
-                existing_numbers = {int(s[2:]) for s in existing}
-                while candidate in existing_numbers and candidate > 1:
-                    candidate -= 1
-                if candidate in existing_numbers:
-                    raise ValueError("No available shot numbers before first shot")
-                new_number = candidate
-            shot_name = f"SH{new_number:03d}"
+            # Insert before the first shot using gap-filling
+            shot_name = f"SH{self.get_next_shot_number():03d}"
         else:
             base_shot = after_shot.split('_')[0]
 
@@ -345,21 +345,8 @@ class ShotManager:
                 # After a sub-shot: simply append a new sub-shot for the same base
                 shot_name = self._create_subshot_name(base_shot, existing)
             else:
-                after_num = int(base_shot[2:])
-                next_numbers = sorted(
-                    n for n in (int(s[2:5]) for s in existing if '_' not in s) if n > after_num
-                )
-
-                if next_numbers:
-                    next_num = next_numbers[0]
-                    if next_num - after_num > 1:
-                        new_number = after_num + ((next_num - after_num) // 2)
-                        shot_name = f"SH{new_number:03d}"
-                    else:
-                        shot_name = self._create_subshot_name(base_shot, existing)
-                else:
-                    new_number = after_num + 10
-                    shot_name = f"SH{new_number:03d}"
+                # For top-level shots, use gap-filling
+                shot_name = f"SH{self.get_next_shot_number():03d}"
 
         validate_shot_name(shot_name)
         if shot_name in existing:
