@@ -961,6 +961,34 @@ body {
     cursor: grab;
     transition: background 0.2s;
     user-select: none;
+    position: relative;
+    padding-left: 70px;
+}
+
+.reorder-item::before {
+    content: "⋮⋮";
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b5b5b5;
+    font-size: 16px;
+    cursor: grab;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.reorder-item:hover::before {
+    color: #e5e5e5;
+}
+
+.reorder-item:hover {
+    background: #333333;
+    cursor: grab;
+}
+
+.reorder-item:active {
+    cursor: grabbing;
 }
 
 .reorder-item:last-child {
@@ -989,7 +1017,7 @@ body {
     border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
-    margin-right: 12px;
+    margin: 0 12px 0 8px;
     min-width: 30px;
     text-align: center;
 }
@@ -1002,17 +1030,21 @@ body {
 
 /* Sortable drag states */
 .reorder-ghost {
-    opacity: 0.4;
-    background: #00c851;
+    opacity: 0.7;
+    background: rgba(0, 200, 81, 0.2);
+    border: 2px dashed #00c851;
 }
 
 .reorder-chosen {
-    transform: rotate(5deg);
+    transform: rotate(2deg);
+    background: #2a2a2a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .reorder-drag {
-    background: #333333;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: #2a2a2a;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    border-left: 3px solid #00c851;
 }
 
 /* TOC filter styling for reorder modal */
@@ -1058,6 +1090,7 @@ body {
 .reorder-item {
     font-size: 13px;
     padding: 8px 12px;
+    padding-left: 30px;
     line-height: 1.25;
 }
 

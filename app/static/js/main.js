@@ -1688,6 +1688,9 @@ function openReorderModal() {
 
     if (!modal || !list) return;
 
+    // Capture current scroll position before opening modal
+    captureScroll();
+
     // Clear previous content
     list.innerHTML = '';
     filter.value = '';
