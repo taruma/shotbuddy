@@ -317,6 +317,17 @@
                 <div id="video-prompt" class="video-prompt"></div>
             </div>
         </div>
+        <!-- Navigation arrows positioned outside the modal content -->
+        <button class="nav-arrow nav-arrow-left" onclick="navigateToPreviousShot()" aria-label="Previous shot">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <button class="nav-arrow nav-arrow-right" onclick="navigateToNextShot()" aria-label="Next shot">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
     </div>
 
     <!-- Image View Modal -->

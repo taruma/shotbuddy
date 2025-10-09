@@ -2065,12 +2065,18 @@ async function confirmExport() {
 }
 
 // Video Playback Functions
+let currentVideoShotIndex = -1;
+
 function playVideo(shotName, displayName) {
     const shot = shots.find(s => s.name === shotName);
     if (!shot || !shot.video || !shot.video.file) {
         showNotification('No video available for this shot', 'error');
         return;
     }
+
+    // Find the current shot index in the active shots array
+    const activeShots = shots.filter(s => !s.archived && s.video && s.video.file);
+    currentVideoShotIndex = activeShots.findIndex(s => s.name === shotName);
 
     const videoUrl = `/api/shots/video/${shotName}?v=${Date.now()}`;
     const videoPlayer = document.getElementById('video-player');
@@ -2102,11 +2108,55 @@ function playVideo(shotName, displayName) {
     // Show modal
     document.getElementById('video-modal').style.display = 'flex';
 
+    // Add keyboard navigation listeners
+    document.addEventListener('keydown', handleVideoModalKeydown);
+
     // Load and play video
     videoPlayer.load();
     videoPlayer.play().catch(e => {
         console.log('Autoplay prevented:', e);
     });
+}
+
+function navigateToNextShot() {
+    const activeShots = shots.filter(s => !s.archived && s.video && s.video.file);
+    if (activeShots.length === 0 || currentVideoShotIndex === -1) return;
+
+    const nextIndex = (currentVideoShotIndex + 1) % activeShots.length;
+    const nextShot = activeShots[nextIndex];
+    
+    if (nextShot) {
+        playVideo(nextShot.name, nextShot.display_name || '');
+    }
+}
+
+function navigateToPreviousShot() {
+    const activeShots = shots.filter(s => !s.archived && s.video && s.video.file);
+    if (activeShots.length === 0 || currentVideoShotIndex === -1) return;
+
+    const prevIndex = (currentVideoShotIndex - 1 + activeShots.length) % activeShots.length;
+    const prevShot = activeShots[prevIndex];
+    
+    if (prevShot) {
+        playVideo(prevShot.name, prevShot.display_name || '');
+    }
+}
+
+function handleVideoModalKeydown(event) {
+    // Only handle arrow keys when video modal is open
+    const videoModal = document.getElementById('video-modal');
+    if (videoModal.style.display !== 'flex') return;
+
+    switch (event.key) {
+        case 'ArrowLeft':
+            event.preventDefault();
+            navigateToPreviousShot();
+            break;
+        case 'ArrowRight':
+            event.preventDefault();
+            navigateToNextShot();
+            break;
+    }
 }
 
 function closeVideoModal() {
@@ -2117,6 +2167,9 @@ function closeVideoModal() {
     videoPlayer.pause();
     videoPlayer.currentTime = 0;
     videoPlayer.src = '';
+
+    // Remove keyboard navigation listeners
+    document.removeEventListener('keydown', handleVideoModalKeydown);
 }
 
 // Image View Functions

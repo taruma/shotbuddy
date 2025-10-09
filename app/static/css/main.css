@@ -1338,6 +1338,54 @@ body {
     overflow: hidden;
 }
 
+/* Navigation Arrows for Video Modal */
+.nav-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(58, 58, 58, 0.9);
+    color: #e5e5e5;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    z-index: 10001; /* Above modal content */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav-arrow:hover {
+    background: rgba(80, 80, 80, 0.95);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.nav-arrow-left {
+    left: 40px;
+}
+
+.nav-arrow-right {
+    right: 40px;
+}
+
+.nav-arrow svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Light theme for navigation arrows */
+.light .nav-arrow {
+    background: rgba(240, 240, 240, 0.8);
+    color: #333;
+}
+
+.light .nav-arrow:hover {
+    background: rgba(220, 220, 220, 0.9);
+}
+
 .video-header {
     display: flex;
     justify-content: space-between;
