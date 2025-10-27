@@ -476,6 +476,15 @@ class ShotManager:
             f'{shot_name}_last', ALLOWED_IMAGE_EXTENSIONS
         )
 
+        # Detect existing versions if max_version seems inaccurate
+        if first_max_version == 0:
+            detected_first_versions = self._detect_existing_versions(shot_name, 'first_image')
+            first_max_version = max(first_max_version, detected_first_versions)
+        
+        if last_max_version == 0:
+            detected_last_versions = self._detect_existing_versions(shot_name, 'last_image')
+            last_max_version = max(last_max_version, detected_last_versions)
+
         first_image_path = self._normalize_path(first_image_path)
         last_image_path = self._normalize_path(last_image_path)
 
@@ -490,6 +499,12 @@ class ShotManager:
             self.latest_videos_dir, shot_dir / 'videos',
             shot_name, ALLOWED_VIDEO_EXTENSIONS
         )
+        
+        # Detect existing video versions if max_version seems inaccurate
+        if max_video_version == 0:
+            detected_video_versions = self._detect_existing_versions(shot_name, 'video')
+            max_video_version = max(max_video_version, detected_video_versions)
+            
         latest_video = self._normalize_path(latest_video)
         current_video_version = self.get_current_version(shot_name, 'video', max_video_version)
         video_prompt = ''
@@ -596,6 +611,45 @@ class ShotManager:
                 version = max(versions)
 
         return latest_final, version
+
+    def _detect_existing_versions(self, shot_name, asset_type):
+        """Detect existing versions by scanning the file system for a specific asset type."""
+        shot_dir = self.wip_dir / shot_name
+        
+        if asset_type == 'first_image':
+            wip_dir = shot_dir / 'images'
+            patterns = [
+                f'{shot_name}_first_v*.*',  # new naming
+                f'{shot_name}_v*.*'         # legacy naming (for first image)
+            ]
+        elif asset_type == 'last_image':
+            wip_dir = shot_dir / 'images'
+            patterns = [f'{shot_name}_last_v*.*']
+        elif asset_type == 'video':
+            wip_dir = shot_dir / 'videos'
+            patterns = [f'{shot_name}_v*.*']
+        else:
+            return 0  # Unsupported asset type
+
+        if not wip_dir.exists():
+            return 0
+
+        versions = set()
+        for pattern in patterns:
+            for f in wip_dir.glob(pattern):
+                try:
+                    # Extract version number from filename
+                    stem = f.stem
+                    if '_v' not in stem:
+                        continue
+                    version_str = stem.split('_v')[1]
+                    # Handle cases where there might be additional underscores
+                    version_num = int(version_str.split('_')[0])
+                    versions.add(version_num)
+                except (IndexError, ValueError):
+                    continue
+
+        return max(versions) if versions else 0
 
     def _version_marker_path(self, asset_type, shot_name):
         if asset_type == 'image':

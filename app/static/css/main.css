@@ -468,6 +468,11 @@ body {
     user-select: none;
 }
 
+.version-badge.multiple-versions {
+    background: #ff9800; /* Orange accent color for multiple versions */
+    color: #1a1a1a;
+}
+
 .prompt-button {
     position: absolute;
     bottom: 4px;

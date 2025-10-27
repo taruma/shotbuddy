@@ -865,6 +865,9 @@ function createDropZone(shot, type) {
                 `<div class="preview-thumbnail placeholder"></div>`;
         }
 
+        const hasMultipleVersions = maxVersion > 1;
+        const badgeClass = hasMultipleVersions ? 'version-badge multiple-versions' : 'version-badge';
+        
         return `
                     <div class="drop-zone with-caption"
                          ondragover="handleDragOver(event, '${type}')"
@@ -873,8 +876,8 @@ function createDropZone(shot, type) {
                         <div class="file-preview">
                             ${mediaHtml}
 
-                            <div class="version-badge"
-                                 title="Click to cycle version"
+                            <div class="${badgeClass}"
+                                 title="Click to cycle version${hasMultipleVersions ? ' (multiple versions available)' : ''}"
                                  onclick="cycleAssetVersion('${shot.name}', '${type}')">v${String(currentVersion).padStart(3, '0')}</div>
                             <button class="prompt-button"
                                     title="View and edit prompt"
