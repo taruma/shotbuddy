@@ -1,5 +1,22 @@
 # Changelog
 
+## v3.4.0 (October 27, 2025) - by Taruma Sakti
+
+This minor release introduces enhanced navigation capabilities, improved shot management workflows, and refined user experience for media browsing and project organization.
+
+### Added
+- **Gap-Filling Shot Numbering System**: Implemented intelligent shot numbering that fills gaps in sequences rather than using fixed increments, starting from 1 instead of 10 and supporting up to 999 shots for more efficient organization.
+- **Enhanced Drag-and-Drop UI**: Added grippy handle to reorder items with improved visual feedback, animations, and better spacing for more intuitive shot organization.
+- **Video Loop Playback**: Added loop attribute to video player for continuous automatic replay, improving user experience by providing uninterrupted playback.
+- **Video Modal Navigation**: Added navigation arrows and keyboard support (arrow keys) for browsing between shots in video modal without closing the interface.
+- **Image Modal Navigation**: Added keyboard navigation and arrow buttons for seamless browsing between images in the modal interface.
+- **Version Detection Improvements**: Enhanced shot manager to detect existing versions for accurate version tracking, preventing conflicts when assets already exist and showing orange badges when multiple versions are available.
+
+### AI Development Attribution
+This release was developed with AI assistance using Cline's Plan/Act workflow, powered by the Deepseek v3.1 model. All generated changes were manually reviewed, tested, and refined by the maintainer, Taruma Sakti, to ensure quality and alignment with project goals.
+
+This version enhances media browsing experience and shot organization efficiency while maintaining backward compatibility.
+
 ## v3.3.0 (October 6, 2025) - by Taruma Sakti
 
 This minor release introduces enhanced media serving capabilities, improved UI responsiveness, and code quality refinements for better user experience and maintainability.
