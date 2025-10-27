@@ -2067,6 +2067,10 @@ async function confirmExport() {
 // Video Playback Functions
 let currentVideoShotIndex = -1;
 
+// Image Navigation Functions
+let currentImageShotIndex = -1;
+let currentImageAssetType = '';
+
 function playVideo(shotName, displayName) {
     const shot = shots.find(s => s.name === shotName);
     if (!shot || !shot.video || !shot.video.file) {
@@ -2180,6 +2184,11 @@ function showImage(shotName, displayName, assetType) {
         return;
     }
 
+    // Find the current shot index in the active shots array for this specific asset type
+    const activeShots = shots.filter(s => !s.archived && s[assetType] && s[assetType].file);
+    currentImageShotIndex = activeShots.findIndex(s => s.name === shotName);
+    currentImageAssetType = assetType;
+
     const imageUrl = `/api/shots/image/${shotName}/${assetType}?v=${Date.now()}`;
     const imageDisplay = document.getElementById('image-display');
     const imageModalTitle = document.getElementById('image-modal-title');
@@ -2210,6 +2219,50 @@ function showImage(shotName, displayName, assetType) {
 
     // Show modal
     document.getElementById('image-modal').style.display = 'flex';
+
+    // Add keyboard navigation listeners
+    document.addEventListener('keydown', handleImageModalKeydown);
+}
+
+function navigateToNextImage() {
+    const activeShots = shots.filter(s => !s.archived && s[currentImageAssetType] && s[currentImageAssetType].file);
+    if (activeShots.length === 0 || currentImageShotIndex === -1) return;
+
+    const nextIndex = (currentImageShotIndex + 1) % activeShots.length;
+    const nextShot = activeShots[nextIndex];
+    
+    if (nextShot) {
+        showImage(nextShot.name, nextShot.display_name || '', currentImageAssetType);
+    }
+}
+
+function navigateToPreviousImage() {
+    const activeShots = shots.filter(s => !s.archived && s[currentImageAssetType] && s[currentImageAssetType].file);
+    if (activeShots.length === 0 || currentImageShotIndex === -1) return;
+
+    const prevIndex = (currentImageShotIndex - 1 + activeShots.length) % activeShots.length;
+    const prevShot = activeShots[prevIndex];
+    
+    if (prevShot) {
+        showImage(prevShot.name, prevShot.display_name || '', currentImageAssetType);
+    }
+}
+
+function handleImageModalKeydown(event) {
+    // Only handle arrow keys when image modal is open
+    const imageModal = document.getElementById('image-modal');
+    if (imageModal.style.display !== 'flex') return;
+
+    switch (event.key) {
+        case 'ArrowLeft':
+            event.preventDefault();
+            navigateToPreviousImage();
+            break;
+        case 'ArrowRight':
+            event.preventDefault();
+            navigateToNextImage();
+            break;
+    }
 }
 
 function closeImageModal() {
@@ -2218,6 +2271,9 @@ function closeImageModal() {
 
     imageModal.style.display = 'none';
     imageDisplay.src = '';
+
+    // Remove keyboard navigation listeners
+    document.removeEventListener('keydown', handleImageModalKeydown);
 }
 
 // Close video modal when clicking outside
@@ -2252,6 +2308,8 @@ document.addEventListener('click', function (event) {
 // Expose image functions globally
 window.showImage = showImage;
 window.closeImageModal = closeImageModal;
+window.navigateToNextImage = navigateToNextImage;
+window.navigateToPreviousImage = navigateToPreviousImage;
 
 // Expose functions globally
 window.openProjectInfoModal = openProjectInfoModal;
